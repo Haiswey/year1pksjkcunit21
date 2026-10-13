@@ -1,0 +1,595 @@
+<!doctype html>
+<!--
+  READABLE COPY: long base64 data (pictures, emoji SVGs, voice recordings) is replaced by <EMBEDDED-DATA-OMITTED>.
+  The complete working page is index.html in the repository root.
+-->
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>[hidden]{display:none!important}</style>
+<title>找谁来帮忙</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&family=ZCOOL+KuaiLe&display=swap">
+<style>
+/* Layout: one phone-first column, six steps behind a sticky progress bar; big tap targets for Year 1 */
+:root{
+  --bg:#eef6fb; --surface:#ffffff; --ink:#1b2a41; --muted:#4f6279; --line:#cfe0ee;
+  --alarm:#e63946; --alarm-ink:#ffffff; --sun:#ffc93c; --sun-ink:#3d2e00;
+  --ok:#1f8a70; --ok-bg:#dcf4ec; --bad:#c0392b; --bad-bg:#fde4e1;
+  --font-display:"ZCOOL KuaiLe","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --font-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1b2b; --surface:#192a40; --ink:#eef4fa; --muted:#a9bbcf; --line:#2c425d;
+  --alarm:#ff5a67; --alarm-ink:#1b0709; --sun:#ffd25a; --sun-ink:#3d2e00;
+  --ok:#5fd3b3; --ok-bg:#12372f; --bad:#ff8c80; --bad-bg:#40201d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1b2b; --surface:#192a40; --ink:#eef4fa; --muted:#a9bbcf; --line:#2c425d;
+  --alarm:#ff5a67; --alarm-ink:#1b0709; --sun:#ffd25a; --sun-ink:#3d2e00;
+  --ok:#5fd3b3; --ok-bg:#12372f; --bad:#ff8c80; --bad-bg:#40201d; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:18px;line-height:1.6;padding-inline:16px;padding-block:0 40px}
+.wrap{max-width:720px;margin-inline:auto}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:2.2rem} h2{font-size:1.7rem} h3{font-size:1.3rem}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--alarm);outline-offset:2px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 8px}
+.top-row{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.brand{font-family:var(--font-display);font-size:1.15rem;display:flex;align-items:center;gap:8px}
+.badge999{background:var(--alarm);color:var(--alarm-ink);border-radius:8px;padding:0 8px;font-weight:900;letter-spacing:.06em;font-size:1rem}
+.stars{font-weight:700;font-variant-numeric:tabular-nums}
+.dots{display:flex;gap:6px;margin-top:8px}
+.dot{flex:1;height:10px;border-radius:5px;background:var(--line);border:0;padding:0}
+.dot.done{background:var(--ok)} .dot.now{background:var(--sun);outline:2px solid var(--ink);outline-offset:1px}
+
+.step{display:none;flex-direction:column;gap:18px;padding-top:14px}
+.step.on{display:flex}
+.step-head{display:flex;flex-direction:column;gap:6px}
+.tag{align-self:flex-start;background:var(--sun);color:var(--sun-ink);font-weight:900;font-size:.85rem;border-radius:999px;padding:2px 12px;letter-spacing:.04em}
+.lead{color:var(--muted)}
+.say{background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:700;display:inline-flex;gap:6px;align-items:center;min-height:44px}
+.say:active{transform:scale(.97)}
+
+.panel{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:18px}
+.calm{display:flex;gap:14px;align-items:center;background:var(--sun);color:var(--sun-ink);border-radius:20px;padding:16px 18px}
+.calm .big{font-size:2.6rem;line-height:1}
+.calm b{font-family:var(--font-display);font-weight:400;font-size:1.5rem;display:block}
+
+.ways{display:grid;gap:12px}
+.way{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:14px 16px}
+.way .ico{font-size:2.4rem;width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:var(--bg)}
+.way h3{margin-bottom:2px}
+.way p{color:var(--muted);font-size:1rem}
+.way.w1 .ico{background:var(--sun)} .way.w2 .ico{background:var(--alarm)} .way.w3 .ico{background:var(--ok-bg)}
+.rule{border:3px dashed var(--alarm);border-radius:20px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.rule .ico{font-size:2rem}
+
+.q{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.q.solved{border-color:var(--ok)}
+.q-top{display:flex;gap:14px;align-items:center}
+.q-pic{font-size:3.2rem;line-height:1;width:84px;height:84px;flex:none;border-radius:18px;background:var(--bg);display:grid;place-items:center}
+.q-text{min-width:0}
+.q-text b{font-size:1.15rem;display:block}
+.q-text span{color:var(--muted);font-size:.95rem}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.opt{border:3px solid var(--line);background:var(--bg);border-radius:16px;padding:12px;min-height:64px;font-weight:700;display:flex;gap:8px;align-items:center;justify-content:center;text-align:center;line-height:1.35}
+.opt .e{font-size:1.7rem}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt:disabled{cursor:default}
+.fb{border-radius:14px;padding:10px 14px;font-size:1rem;font-weight:700}
+.fb.good{background:var(--ok-bg);color:var(--ok)}
+.fb.try{background:var(--bad-bg);color:var(--bad)}
+.fb[hidden]{display:none}
+
+.match{display:grid;gap:16px}
+.mrow{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.mrow.solved{border-color:var(--ok)}
+.mtop{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.arrow{font-size:1.6rem;color:var(--muted)}
+.mopts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.m{border:3px solid var(--line);background:var(--bg);border-radius:16px;padding:10px 6px;min-height:104px;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:.95rem;line-height:1.3;min-width:0}
+.m .e{font-size:2.2rem;line-height:1}
+.mq{background:var(--sun);color:var(--sun-ink);border-color:var(--sun)}
+button.m:active{transform:scale(.97)}
+.m.wrongm{border-color:var(--bad);background:var(--bad-bg);opacity:.6}
+.m.shake{animation:shake .35s}
+.slot{border:3px dashed var(--muted);border-radius:16px;min-height:104px;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:.95rem;line-height:1.3;color:var(--muted);font-family:var(--font-display);font-size:2rem;min-width:0}
+.slot.full{border-style:solid;font-family:var(--font-body);font-size:.95rem;color:var(--ink)}
+.slot .e{font-size:2.2rem;line-height:1}
+.pair0{border-color:var(--alarm);background:var(--bad-bg)}
+.pair1{border-color:var(--ok);background:var(--ok-bg)}
+.pair2{border-color:#3b82c4;background:color-mix(in srgb,#3b82c4 22%,var(--surface))}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.sclist{display:grid;gap:12px}
+.sc{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:14px 16px;width:100%}
+.sc .ico{font-size:2.4rem;width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:var(--bg)}
+.sc b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.25rem}
+.sc span.d{color:var(--muted);font-size:.95rem}
+.sc .st{font-size:1.6rem}
+.sc .thumb{width:96px;height:54px;border-radius:12px;object-fit:cover;display:block}
+.sc.done{border-color:var(--ok)}
+.chat{display:flex;flex-direction:column;gap:12px}
+.endact{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.endact .btn{padding-inline:12px;text-align:center;line-height:1.3;width:100%;margin-left:0}
+@media (max-width:420px){.endact{grid-template-columns:1fr}}
+.chat-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chat-bar .btn{padding:8px 16px;min-height:44px;font-size:1rem}
+.msgs{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:14px;min-height:140px}
+.msg{display:flex;gap:10px;align-items:flex-end;max-width:92%}
+.msg .av{font-size:1.8rem;width:44px;height:44px;flex:none;border-radius:50%;background:var(--bg);display:grid;place-items:center}
+.msg .bub{background:var(--bg);border-radius:18px 18px 18px 4px;padding:10px 14px;font-weight:700;min-width:0;overflow-wrap:anywhere}
+.msg .who{display:block;font-size:.8rem;color:var(--muted);font-weight:400}
+.msg.me{align-self:flex-end;flex-direction:row-reverse}
+.msg.me .bub{background:var(--sun);color:var(--sun-ink);border-radius:18px 18px 4px 18px}
+.msg.note{align-self:stretch;max-width:100%}
+.msg.note .bub{background:transparent;border:2px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center;width:100%}
+.msg{animation:pop .25s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}}
+.choices{display:grid;gap:10px}
+.choices .opt{justify-content:flex-start;text-align:left}
+.choices .opt .e{flex:none}
+.big999{font-weight:900}
+.nav{display:flex;gap:12px;justify-content:space-between;margin-top:6px}
+.btn{border:0;border-radius:999px;padding:14px 26px;font-weight:900;font-size:1.1rem;min-height:52px}
+.btn.next{background:var(--alarm);color:var(--alarm-ink);margin-left:auto}
+.btn.back{background:var(--surface);border:2px solid var(--line)}
+.btn[disabled]{opacity:.45;cursor:default}
+.finale{text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.finale .trophy{font-size:4.5rem;line-height:1}
+.starrow{font-size:2.4rem;letter-spacing:.1em}
+.small{font-size:.9rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.m.shake,.msg{animation:none}}
+.scene{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:14px;background:var(--bg)}
+.q-pic{display:flex;flex-direction:row;gap:0;white-space:nowrap;font-size:2.1rem}
+.q-pic .emo{height:1em;width:1em}
+.emo{height:1.1em;width:1.1em;vertical-align:-.2em;display:inline-block;object-fit:contain}
+.credit{font-size:.8rem;color:var(--muted);text-align:center;margin-top:24px}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="top-row">
+      <div class="brand"><span class="badge999">999</span><span>找谁来帮忙？</span></div>
+      <div class="stars" aria-live="polite">⭐ <span id="starCount">0</span></div>
+    </div>
+    <nav class="dots" id="dots" aria-label="学习进度"></nav>
+  </header>
+
+  <!-- 0 -->
+  <section class="step on" data-title="开始">
+    <div class="step-head">
+      <span class="tag">单元十一 · 糖果玩具不可要</span>
+      <h1>面对紧急状况，<br>不要慌！</h1>
+      <p class="lead">今天我们要学：认识紧急状况，知道怎么做，还要在聊天故事里练习求助。</p>
+      <button class="say" data-say="面对紧急状况，不要慌。遇到紧急状况，可以大声向路人求助，拨打九九九，或者向成人求助。">🔊 听一听</button>
+    </div>
+    <div class="calm"><span class="big">🧘</span><div><b>先深呼吸，保持冷静</b>想一想，找谁来帮忙？</div></div>
+    <div class="ways">
+      <div class="way w1"><div class="ico">📢</div><div><h3>大声向路人求助</h3><p>大喊“救命啊！”，请附近的叔叔阿姨帮忙。</p></div></div>
+      <div class="way w2"><div class="ico">📞</div><div><h3>拨打紧急求助电话 999</h3><p>火灾、有人受重伤、遇到坏人时，请大人拨打。</p></div></div>
+      <div class="way w3"><div class="ico">🧑‍🏫</div><div><h3>向成人求助</h3><p>爸爸妈妈、老师、警察、邻居，都是可以帮忙的人。</p></div></div>
+    </div>
+    <div class="rule"><span class="ico">⚠️</span><p><b>记住：</b>只有真的发生紧急状况，才可以拨 999。平时不可以乱打，也不可以拿来玩。</p></div>
+    <div class="rule"><span class="ico">🍬</span><p><b>糖果玩具不可要！</b>陌生人给的糖果和玩具，不可以接受，也不可以跟陌生人走。</p></div>
+    <div class="nav"><button class="btn next" data-go="1">开始学习 ➜</button></div>
+  </section>
+
+  <!-- 1 -->
+  <section class="step" data-title="紧急状况" id="s1">
+    <div class="step-head">
+      <span class="tag">10.1.1 明白紧急事件</span>
+      <h2>这是紧急状况吗？</h2>
+      <p class="lead">看图，点一点“是”或“不是”。</p>
+    </div>
+    <div id="quiz1" class="qlist" style="display:grid;gap:14px"></div>
+    <div class="panel">
+      <h3>还有哪些紧急状况？</h3>
+      <p class="lead">和爸爸妈妈说一说，你还想到哪些紧急状况？例如：停电、地震、有陌生人敲门……</p>
+    </div>
+    <div class="nav"><button class="btn back" data-go="0">⬅ 返回</button><button class="btn next" data-go="2">下一步 ➜</button></div>
+  </section>
+
+  <!-- 2 -->
+  <section class="step" data-title="谁做得对" id="s2">
+    <div class="step-head">
+      <span class="tag">10.1.2 适当的方法</span>
+      <h2>谁做得对？</h2>
+      <p class="lead">点一点你觉得对的做法。选错了可以再选一次。</p>
+    </div>
+    <div id="quiz2" style="display:grid;gap:14px"></div>
+    <div class="nav"><button class="btn back" data-go="1">⬅ 返回</button><button class="btn next" data-go="3">下一步 ➜</button></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="step" data-title="连一连" id="s3">
+    <div class="step-head">
+      <span class="tag">10.1.2 适当的方法</span>
+      <h2>连一连</h2>
+      <p class="lead">看一看有什么事发生了，再点一下下面正确的方法。答对了，答案会跑到“？”里。</p>
+    </div>
+    <div class="match" id="match"></div>
+    <div class="fb good" id="matchDone" hidden>全部连对了，真棒！ 🎉</div>
+    <div class="nav"><button class="btn back" data-go="2">⬅ 返回</button><button class="btn next" data-go="4">下一步 ➜</button></div>
+  </section>
+
+  <!-- 4 -->
+  <section class="step" data-title="我会求助" id="s4">
+    <div class="step-head">
+      <span class="tag">10.1.3 实践求助</span>
+      <h2>我会求助</h2>
+      <p class="lead">像聊天一样，选一选你会怎么说、怎么做。选对了，故事才会继续。</p>
+    </div>
+    <p class="lead" id="scProg"></p>
+    <div id="scList" class="sclist"></div>
+    <div id="chat" class="chat" hidden>
+      <div class="chat-bar"><button class="btn back" id="chatBack">⬅ 选别的故事</button><b id="chatTitle"></b></div>
+      <img class="scene" id="chatImg" alt="" hidden>
+      <div class="msgs" id="msgs" aria-live="polite"></div>
+      <div class="choices" id="choices"></div>
+      <div class="fb" id="chatFb" hidden></div>
+      <div class="fb good" id="chatEnd" hidden></div>
+      <div class="endact" id="endAct" hidden><button class="btn back" id="btnOther"></button><button class="btn next" data-go="5">完成 ➜</button></div>
+    </div>
+    <div class="nav" id="nav4"><button class="btn back" data-go="3">⬅ 返回</button><button class="btn next" data-go="5">完成 ➜</button></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="step" data-title="完成" id="s5">
+    <div class="finale panel">
+      <div class="trophy">🏆</div>
+      <h2>你学会了！</h2>
+      <div class="starrow" id="finalStars" aria-live="polite"></div>
+      <p id="finalMsg"></p>
+      <button class="say" data-say="太棒了！遇到紧急状况，不要慌，大声求助，拨打九九九，或者向成人求助。">🔊 听一听</button>
+    </div>
+    <div class="panel">
+      <h3>今天记住了吗？</h3>
+      <p>① 不要慌　② 大声向路人求助　③ 拨打 999　④ 向成人求助</p>
+      <p class="small" style="margin-top:8px">想再练习，可以回到“我会求助”，换一个故事玩。</p>
+    </div>
+    <div class="nav"><button class="btn back" data-go="4">⬅ 返回</button><button class="btn next" id="again">再玩一次 ↺</button></div>
+  </section>
+  <p class="credit">题目插图由 Canva AI 生成；小图标来自 OpenMoji（openmoji.org，CC BY-SA 4.0）。</p>
+</div>
+
+<script>window.__SCENE={"fire": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "drown": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "bleed": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "mall": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "haze": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "candy": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "toycar": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "crash": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "lost2": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "scared": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "brother": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "dryer": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "stranger": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "haze2": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "power": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "door": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>", "call": "data:image/jpeg;base64,<EMBEDDED-DATA-OMITTED>"};</script>
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var steps=[].slice.call(document.querySelectorAll('.step'));
+  var now=0, maxSeen=0;
+  var score={q1:0,q2:0,match:0,roles:0};
+  var TOTAL={q1:7,q2:7,match:3,roles:6};
+
+  function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+
+  /* ---------- speech ---------- */
+  var curAudio=null,sayToken=0;
+  function stopSay(){
+    sayToken++;
+    if(curAudio){try{curAudio.pause()}catch(e){}curAudio=null}
+    try{if('speechSynthesis' in window)speechSynthesis.cancel()}catch(e){}
+  }
+  /* plays one line; returns a promise that resolves when it has finished (or was interrupted) */
+  function say(t){
+    t=String(t).replace(/999/g,'九九九');
+    stopSay();
+    var my=sayToken;
+    return new Promise(function(resolve){
+      var src=(window.__AUD||{})[t];
+      if(src){
+        try{
+          var a=new Audio(src);curAudio=a;
+          a.onended=function(){resolve()};
+          var p=a.play();
+          if(p&&p.catch)p.catch(function(){if(sayToken===my)speak(t,resolve);else resolve()});
+          return;
+        }catch(e){}
+      }
+      speak(t,resolve);
+    });
+  }
+  function speak(t,done){
+    try{
+      if(!('speechSynthesis' in window)){done&&done();return}
+      var u=new SpeechSynthesisUtterance(t);u.lang='zh-CN';u.rate=.85;
+      if(done){u.onend=done;u.onerror=done}
+      speechSynthesis.speak(u);
+    }catch(e){done&&done()}
+  }
+
+  /* ---------- progress ---------- */
+  function totalStars(){return score.q1+score.q2+score.match+score.roles}
+  function maxStars(){return TOTAL.q1+TOTAL.q2+TOTAL.match+TOTAL.roles}
+  function drawDots(){
+    var d=$('#dots');d.innerHTML='';
+    steps.forEach(function(s,i){
+      var b=document.createElement('button');
+      b.className='dot'+(i===now?' now':'')+(i<now?' done':'');
+      b.setAttribute('aria-label','第'+(i+1)+'步：'+s.dataset.title);
+      b.onclick=function(){if(i<=maxSeen)go(i)};
+      d.appendChild(b);
+    });
+    $('#starCount').textContent=totalStars();
+  }
+  function go(i){
+    stopSay();now=i;maxSeen=Math.max(maxSeen,i);
+    steps.forEach(function(s,k){s.classList.toggle('on',k===i)});
+    if(i===5)finish();
+    drawDots();
+    window.scrollTo({top:0,behavior:'auto'});
+  }
+  document.addEventListener('click',function(e){
+    var g=e.target.closest('[data-go]');if(g){go(+g.dataset.go);return}
+    var s=e.target.closest('[data-say]');if(s){say(s.dataset.say)}
+  });
+
+  /* ---------- choice quizzes ---------- */
+  function buildQuiz(host,items,key){
+    items.forEach(function(it){
+      var q=document.createElement('div');q.className='q';
+      var sc=(window.__SCENE||{})[it.scene];var html=(sc?'<img class="scene" alt="" src="'+sc+'">':'')+'<div class="q-top">'+(sc?'':'<div class="q-pic" aria-hidden="true">'+it.pic+'</div>')+'<div class="q-text"><b>'+it.title+'</b>'+(it.sub?'<span>'+it.sub+'</span>':'')+'</div><button class="say" aria-label="听一听" data-say="'+it.title+(it.sub?(/[。！？]$/.test(it.title)?'':'。')+it.sub:'')+'">🔊</button></div><div class="opts">';
+      it.opts.forEach(function(o,i){html+='<button class="opt" data-i="'+i+'">'+(o.e?'<span class="e">'+o.e+'</span>':'')+'<span>'+o.t+'</span></button>'});
+      html+='</div><div class="fb" hidden></div>';
+      q.innerHTML=html;
+      var tried=false,done=false,fb=q.querySelector('.fb');
+      q.querySelectorAll('.opt').forEach(function(b){
+        b.onclick=function(){
+          if(done)return;
+          var o=it.opts[+b.dataset.i];
+          if(o.ok){
+            done=true;b.classList.add('right');q.classList.add('solved');
+            q.querySelectorAll('.opt').forEach(function(x){x.disabled=true});
+            fb.className='fb good';fb.hidden=false;fb.textContent='✔ 答对了！'+it.why;
+            if(!tried){score[key]++;drawDots()}
+          }else{
+            tried=true;b.classList.add('wrong');b.disabled=true;
+            fb.className='fb try';fb.hidden=false;fb.textContent='再想一想，再选一次。'+(o.hint||'');
+          }
+        };
+      });
+      host.appendChild(q);
+    });
+  }
+  var yn=function(yes){return [{t:'是',e:'🚨',ok:yes},{t:'不是',e:'🙂',ok:!yes}]};
+  buildQuiz($('#quiz1'),[
+    {scene:'fire',pic:'🔥🏠',title:'房子着火了！',sub:'浓烟冒出来。',opts:yn(true),why:'着火很危险，要马上找大人，拨打 999。'},
+    {scene:'drown',pic:'🏊🆘',title:'有人在水里喊“救命”。',opts:yn(true),why:'有人溺水，要大声找大人帮忙，不要自己跳下水。'},
+    {scene:'bleed',pic:'🤕🩸',title:'同学跌倒了，流很多血。',opts:yn(true),why:'受伤流血要马上告诉大人。'},
+    {scene:'mall',pic:'😢🧭',title:'在商场里和妈妈走散了。',sub:'我迷路了。',opts:yn(true),why:'迷路了要找可以信任的人帮忙，例如警察或商场职员。'},
+    {scene:'haze',pic:'😷🌫️',title:'今天有雾霾。我在学校，一直咳嗽，喘不过气。',opts:yn(true),why:'呼吸不顺是紧急状况，要马上告诉老师。'},
+    {scene:'candy',pic:'🍬🧸',title:'我想吃糖果，也想要新玩具。',opts:yn(false),why:'想要东西不是紧急状况，不可以拨 999。'},
+    {scene:'toycar',pic:'🚗💤',title:'玩具车的电池没电了。',opts:yn(false),why:'玩具没电不是紧急状况，换电池就可以了。'}
+  ],'q1');
+
+  buildQuiz($('#quiz2'),[
+    {scene:'crash',pic:'🚗💥',title:'公路上发生车祸，有人受伤。',opts:[
+      {t:'拨打 999，请救护车来',e:'📞',ok:true},{t:'拍照放到网上',e:'📱',ok:false,hint:'受伤的人需要马上帮忙。'}],why:'要拨 999，请救护车和警察来。'},
+    {scene:'lost2',pic:'😟🗺️',title:'我迷路了。',opts:[
+      {t:'向警察叔叔求助',e:'👮',ok:true},{t:'跟着陌生人走',e:'🚶',ok:false,hint:'不可以跟陌生人走。'}],why:'警察可以帮我们找到家人。'},
+    {scene:'scared',pic:'😨🤕',title:'我很怕，膝盖流血了。',opts:[
+      {t:'告诉大人，请他帮忙',e:'🧑‍🍼',ok:true},{t:'躲起来，不告诉别人',e:'🙈',ok:false,hint:'受伤要告诉大人。'}],why:'告诉大人，才能得到帮助。'},
+    {scene:'brother',pic:'👦🧸',title:'弟弟跌倒了，大哭“妈妈！”',opts:[
+      {t:'去找大人来帮忙',e:'🏃',ok:true},{t:'继续玩玩具',e:'🧸',ok:false,hint:'要帮助弟弟。'}],why:'马上找大人来帮忙。'},
+    {scene:'dryer',pic:'💨⚡',title:'吹风筒坏了，冒出烟来。',opts:[
+      {t:'大声叫大人来',e:'📢',ok:true},{t:'自己用手去修',e:'🔧',ok:false,hint:'电器很危险，不可以自己修。'}],why:'电器出问题很危险，要请大人处理。'},
+    {scene:'stranger',pic:'🕶️🍬',title:'陌生人说：“我有糖果和玩具，跟我来拿！”',opts:[
+      {t:'说“不要！”，走去找大人',e:'✋',ok:true},{t:'高兴地跟他去',e:'😋',ok:false,hint:'糖果玩具不可要！'}],why:'不接受陌生人的糖果和玩具，要马上告诉大人。'},
+    {scene:'haze2',pic:'😷🏫',title:'雾霾天，下课了。',opts:[
+      {t:'留在教室里玩',e:'🏫',ok:true},{t:'去操场跑步',e:'🏃',ok:false,hint:'雾霾天空气不好。'}],why:'雾霾天尽量留在室内。'}
+  ],'q2');
+
+  /* ---------- match: one tap per situation ---------- */
+  var MA=[{e:'📞🚑',t:'拨打 999，请救护车'},{e:'👮',t:'向警察求助'},{e:'📢',t:'大声求救，向路人求助'}];
+  var MQ=[{e:'🤕',t:'有人晕倒了',a:0},{e:'😢',t:'我迷路了',a:1},{e:'🕶️',t:'陌生人一直跟着我',a:2}];
+  var matched=0;
+  function drawMatch(){
+    var host=$('#match');host.innerHTML='';
+    MQ.forEach(function(q,i){
+      var row=document.createElement('div');row.className='mrow';
+      row.innerHTML='<div class="mtop"><div class="m mq"><span class="e">'+q.e+'</span><span>'+q.t+'</span></div><span class="arrow" aria-hidden="true">➜</span><div class="slot" aria-label="答案放这里">?</div></div><div class="mopts"></div>';
+      var opts=row.querySelector('.mopts'),slot=row.querySelector('.slot'),tried=false;
+      [(i+1)%3,(i+2)%3,i%3].forEach(function(k){
+        var b=document.createElement('button');b.className='m';
+        b.innerHTML='<span class="e">'+MA[k].e+'</span><span>'+MA[k].t+'</span>';
+        b.onclick=function(){
+          if(k===q.a){
+            slot.className='slot full pair'+i;slot.innerHTML='<span class="e">'+MA[k].e+'</span><span>'+MA[k].t+'</span>';
+            opts.hidden=true;row.classList.add('solved');
+            if(!tried){score.match++;drawDots()}
+            matched++;if(matched===3)$('#matchDone').hidden=false;
+          }else{
+            tried=true;b.disabled=true;b.classList.add('shake','wrongm');
+          }
+        };
+        opts.appendChild(b);
+      });
+      host.appendChild(row);
+    });
+  }
+
+  /* ---------- chat scenarios ---------- */
+  var N=function(t){return {n:t}};
+  var T=function(av,who,t){return {av:av,who:who,t:t}};
+  var C=function(q,opts){return {q:q,opts:opts}};
+  var O=function(e,t,ok,hint){return {e:e,t:t,ok:ok,hint:hint||''}};
+  var SC=[
+    {id:'lost',img:'mall',ico:'🛍️',title:'在商场迷路了',d:'找不到妈妈，怎么办？',end:'你做得很好！迷路了要冷静，向保安或职员求助。',steps:[
+      N('你在商场里和妈妈走散了。你看不到妈妈。'),
+      C('你会怎么做？',[O('🧍','站在原地，不要慌，找保安或职员帮忙',1),O('🏃','到处乱跑去找妈妈',0,'乱跑会让妈妈更难找到你。'),O('🚶','跟着一个陌生人走',0,'不可以跟陌生人走。')]),
+      T('👮','保安叔叔','小朋友，你怎么了？'),
+      C('你要怎么说？',[O('🗣️','我和妈妈走散了。我叫小华。',1),O('😭','（一直哭，什么也不说）',0,'要把话说出来，叔叔才知道怎么帮你。'),O('🙅','我不要跟你说话！',0,'保安叔叔是可以帮你的人。')]),
+      T('👮','保安叔叔','别怕。我会用广播帮你找妈妈。你知道妈妈的电话号码吗？'),
+      C('你怎么回答？',[O('📱','我知道，我告诉你。',1),O('🙋','我不知道，但我记得妈妈穿红色的衣服。',1)]),
+      T('👩','妈妈','小华！妈妈在这里！')]},
+    {id:'candy',img:'stranger',ico:'🍬',title:'陌生人给糖果和玩具',d:'放学后在校门口等妈妈',end:'你做得很对！不可以接受陌生人的糖果和玩具，要大声求助。',steps:[
+      N('放学了，你在校门口等妈妈。'),
+      T('🕶️','陌生人','小朋友，我有糖果和新玩具，跟我到车上拿吧！'),
+      C('你会怎么做？',[O('😋','好啊，我要糖果和玩具！',0,'糖果玩具不可要！陌生人可能是坏人。'),O('✋','不要！我不认识你！',1)]),
+      T('🕶️','陌生人','来嘛，很近而已，我拉你过去！'),
+      C('他想拉你的手，你要怎么办？',[O('📢','大声叫“救命啊！”，跑去找老师或保安',1),O('🤫','不出声，跟着他走',0,'要大声求救，让大家听见。'),O('🙈','躲起来，不告诉任何人',0,'要马上告诉大人。')]),
+      T('🧑‍🏫','老师','怎么了？'),
+      C('你要怎么说？',[O('🗣️','老师，有陌生人要给我糖果，还想拉我走！',1),O('🤐','没事。（什么也不说）',0,'要告诉老师，老师才能保护你。')]),
+      T('🧑‍🏫','老师','你别怕，老师会请保安和你的爸爸妈妈来。')]},
+    {id:'haze',img:'haze2',ico:'😷',title:'雾霾天，我不舒服',d:'在学校里遇到雾霾',end:'你做得很好！雾霾天少出去，不舒服要马上告诉大人。',steps:[
+      N('今天有雾霾，空气不好。下课了，同学们想去操场玩。'),
+      C('你会怎么做？',[O('🏫','留在教室里，不去操场',1),O('🏃','去操场跑步',0,'雾霾天空气不好，在外面跑步对身体不好。')]),
+      N('过了一会儿，你觉得胸口很闷，一直咳嗽，喘不过气。'),
+      C('你会怎么做？',[O('🙋','马上举手，告诉老师',1),O('😶','忍着，不说',0,'不舒服要马上告诉大人。')]),
+      T('🧑‍🏫','老师','你怎么了？'),
+      C('你要怎么说？',[O('🗣️','老师，我喘不过气，一直咳嗽！',1),O('😶','没什么。',0,'要把不舒服说出来。')]),
+      T('🧑‍🏫','老师','别怕，老师带你去医务室，也会通知你的爸爸妈妈。如果很严重，大人会拨打 999。')]},
+    {id:'power',img:'power',ico:'🔦',title:'家里停电了',d:'晚上，四周变得很暗',end:'你做得很好！停电时不要慌，留在原地，找大人帮忙，不要自己玩火。',steps:[
+      N('晚上，你在家里。突然停电了，四周变得很暗。'),
+      C('你会怎么做？',[O('🧍','站在原地，大声叫爸爸妈妈',1),O('🏃','自己摸黑跑去厨房',0,'摸黑走路会跌倒受伤。'),O('🛏️','躲在床底下，不出声',0,'要让大人知道你在哪里。')]),
+      T('👩','妈妈','我在这里！别怕。你站着别动，妈妈拿手电筒来。'),
+      N('桌上有蜡烛和火柴。'),
+      C('你要怎么做？',[O('🙋','请大人帮忙，我不碰火柴',1),O('🔥','自己拿火柴点蜡烛',0,'玩火很危险，可能会着火。')]),
+      N('过了很久，还是没有电。你觉得有点怕。'),
+      C('你要怎么说？',[O('🗣️','妈妈，我有点怕，请你陪着我。',1),O('😭','一直哭，什么也不说',0,'把心里的话说出来，大人才知道怎么帮你。')]),
+      T('👩','妈妈','妈妈在这里。我们用手电筒，等电来。')]},
+    {id:'door',img:'door',ico:'🚪',title:'有人敲门',d:'爸爸妈妈还没回来',end:'你做得很对！爸爸妈妈不在时，不开门给陌生人，要告诉大人。',steps:[
+      N('你在家里，爸爸妈妈还没回来。“叮咚！叮咚！”有人在敲门。'),
+      T('🧑‍💼','门外的人','我是送快递的，请开门！'),
+      C('你会怎么做？',[O('📱','不开门，打电话告诉爸爸妈妈',1),O('👀','开门看一看',0,'不可以开门给陌生人。'),O('🚪','开门让他进来',0,'不认识的人，不可以让他进来。')]),
+      T('🧑‍💼','门外的人','小朋友，我有糖果和玩具，快开门！'),
+      C('你要怎么做？',[O('🙅','不开门，也不要理他',1),O('🍬','开门拿糖果和玩具',0,'糖果玩具不可要！')]),
+      N('敲门声越来越大。你很怕。'),
+      C('你可以怎么做？',[O('📱','马上打电话给爸爸妈妈',1),O('📢','大声叫邻居来帮忙',1),O('🙈','躲起来，什么也不做',0,'要找大人帮忙。')]),
+      T('👨','爸爸（电话里）','爸爸马上回来。你不要开门。如果有人撞门，请叫邻居，大人会拨 999。')]},
+    {id:'call',img:'call',ico:'📞',title:'拨打 999',d:'邻居家着火了！',end:'你做得很好！打 999 要说清楚：发生什么事、在哪里、你的名字。',steps:[
+      N('你在家，看到邻居家冒出浓烟，着火了！大人在旁边，请你一起打电话。'),
+      C('紧急求助电话是哪一个？',[O('📞','999',1),O('📞','123',0,'不对。紧急求助电话是 999。'),O('📞','000',0,'不对。紧急求助电话是 999。')]),
+      T('🎧','接线员','您好，这里是 999。请问发生什么事？'),
+      C('你要怎么说？',[O('🔥','邻居家着火了！',1),O('🍬','我想吃糖果。',0,'999 只能在紧急状况才可以打。'),O('📵','（不说话，把电话挂掉）',0,'要把事情说清楚，才会有人来帮忙。')]),
+      T('🎧','接线员','请问你在哪里？'),
+      C('你要怎么回答？',[O('🏠','我在花园路 12 号，就在邻居家隔壁。',1),O('🤷','我不知道。',0,'要说出地址。平时要记住自己家的地址。'),O('🌳','在外面。',0,'要说清楚地方，消防员才找得到。')]),
+      T('🎧','接线员','好的，我们马上来。你叫什么名字？'),
+      C('你要怎么说？',[O('🗣️','我叫小明。请快一点！',1),O('🙅','我不告诉你。',0,'接线员要知道你的名字，才能联络你。')]),
+      T('🎧','接线员','知道了。请站在安全的地方，等大人来。')]}
+  ];
+  var doneSc={};
+  var chat=$('#chat'),msgs=$('#msgs'),choices=$('#choices'),cFb=$('#chatFb'),cEnd=$('#chatEnd');
+  function drawList(){
+    var h='';
+    SC.forEach(function(c){
+      var im=(window.__SCENE||{})[c.img];h+='<button class="sc'+(doneSc[c.id]?' done':'')+'" data-sc="'+c.id+'">'+(im?'<img class="thumb" alt="" src="'+im+'">':'<span class="ico">'+c.ico+'</span>')+'<span style="min-width:0"><b>'+c.title+'</b><span class="d">'+c.d+'</span></span><span class="st">'+(doneSc[c.id]?'✅':'▶️')+'</span></button>';
+    });
+    $('#scList').innerHTML=h;
+    $('#scProg').textContent='已玩 '+Object.keys(doneSc).length+' / '+SC.length+' 个故事。可以全部都玩，也可以随时按“完成”。';
+  }
+  function bubble(o){
+    var d=document.createElement('div');
+    if(o.me){d.className='msg me';d.innerHTML='<div class="av">🧒</div><div class="bub"></div>';d.lastChild.textContent=o.t}
+    else if(o.n){d.className='msg note';d.innerHTML='<div class="bub"></div>';d.lastChild.textContent=o.n}
+    else{d.className='msg';d.innerHTML='<div class="av">'+o.av+'</div><div class="bub"><span class="who"></span><span class="tx"></span></div>';d.querySelector('.who').textContent=o.who;d.querySelector('.tx').textContent=o.t}
+    msgs.appendChild(d);
+    d.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
+  var cur=null,idx=0,slip=false;
+  function start(id){
+    cur=SC.filter(function(c){return c.id===id})[0];idx=0;slip=false;run++;stopSay();
+    msgs.innerHTML='';choices.innerHTML='';cFb.hidden=true;cEnd.hidden=true;
+    $('#chatTitle').textContent=cur.title;var ci=$('#chatImg'),cs=(window.__SCENE||{})[cur.img];if(cs){ci.src=cs;ci.hidden=false}else{ci.hidden=true}
+    $('#scList').hidden=true;$('#scProg').hidden=true;$('#endAct').hidden=true;$('#nav4').hidden=true;chat.hidden=false;
+    advance();
+  }
+  var run=0,lastLine=null;
+  function advance(){
+    cFb.hidden=true;lastLine=null;
+    var myRun=run;
+    while(idx<cur.steps.length){
+      var st=cur.steps[idx];
+      if(st.q){showChoices(st);return}
+      bubble(st);
+      if(st.who)lastLine=say(st.t);
+      idx++;
+    }
+    if(!doneSc[cur.id]){doneSc[cur.id]=1;score.roles=Object.keys(doneSc).length;drawDots()}
+    var left=SC.filter(function(c){return !doneSc[c.id]}).length;
+    cEnd.textContent='🎉 '+cur.end+(left?'':' 6 个故事你都玩完了，真棒！');cEnd.hidden=false;
+    $('#btnOther').textContent=left?'试试另一个故事（还有 '+left+' 个）':'回到故事列表';
+    $('#endAct').hidden=false;
+    setTimeout(function(){try{$('#endAct').scrollIntoView({block:'end',behavior:'smooth'})}catch(e){}},200);
+    var endText=cur.end;
+    (lastLine||Promise.resolve()).then(function(){
+      if(myRun!==run)return;
+      setTimeout(function(){if(myRun===run)say(endText)},350);
+    });
+  }
+  function showChoices(st){
+    choices.innerHTML='';
+    var p=document.createElement('p');p.style.fontWeight='700';p.textContent='👉 '+st.q;choices.appendChild(p);
+    st.opts.forEach(function(o){
+      var b=document.createElement('button');b.className='opt';
+      b.innerHTML='<span class="e">'+o.e+'</span><span></span>';b.lastChild.textContent=o.t;
+      b.onclick=function(){
+        if(o.ok){
+          choices.innerHTML='';bubble({me:1,t:o.t});idx++;
+          setTimeout(advance,450);
+        }else{
+          b.classList.add('wrong');b.disabled=true;
+          cFb.className='fb try';cFb.hidden=false;cFb.textContent='再想一想。'+o.hint;
+        }
+      };
+      choices.appendChild(b);
+    });
+  }
+  $('#scList').addEventListener('click',function(e){var b=e.target.closest('[data-sc]');if(b)start(b.dataset.sc)});
+  function backToList(){run++;stopSay();chat.hidden=true;$('#endAct').hidden=true;$('#scList').hidden=false;$('#scProg').hidden=false;$('#nav4').hidden=false;drawList();window.scrollTo({top:0,behavior:'auto'})}
+  $('#chatBack').onclick=backToList;
+  $('#btnOther').onclick=backToList;
+  drawList();
+
+  /* ---------- finish ---------- */
+  function finish(){
+    var t=totalStars(),m=maxStars(),n=Math.round(t/m*5);
+    $('#finalStars').textContent=new Array(n+1).join('⭐')+new Array(5-n+1).join('☆');
+    $('#finalMsg').textContent='你得了 '+t+' 颗星，共 '+m+' 颗。'+(t===m?'全部答对，太棒了！':'没拿到的星星，可以返回再试一次。');
+    say('做得好');
+  }
+  $('#again').onclick=function(){location.reload()};
+
+  drawMatch();drawDots();
+})();
+</script>
+
+<script>
+/* OpenMoji emoji pictures (CC BY-SA 4.0, https://openmoji.org), embedded so the page works offline */
+(function(){
+  var EMO={"▶": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "⚠": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "⚡": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "✅": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "✋": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "⭐": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🆘": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🌫": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🌳": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🍬": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🎉": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🎧": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🏃": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🏆": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🏊": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🏠": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🏫": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "👀": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "👉": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "👦": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "👨": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "👩": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "👮": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "💤": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "💥": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "💨": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "📞": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "📢": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "📱": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "📵": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🔊": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🔥": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🔦": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🔧": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🕶": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🗣": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🗺": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "😋": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "😟": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "😢": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "😨": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "😭": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "😶": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "😷": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🙂": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🙅": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🙈": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🙋": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🚑": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🚗": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🚨": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🚪": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🚶": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🛍": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🛏": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🤐": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🤕": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🤫": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🤷": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🧍": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🧑‍🍼": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🧑‍🏫": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🧑‍💼": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🧒": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🧘": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🧭": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🧸": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>", "🩸": "data:image/svg+xml;base64,<EMBEDDED-DATA-OMITTED>"};
+  var keys=Object.keys(EMO).sort(function(a,b){return b.length-a.length}).map(function(k){return k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').split('').join('\uFE0F?')});
+  var re=new RegExp('('+keys.join('|')+')\uFE0F?','g');
+  function conv(root){
+    var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null),list=[],n;
+    while((n=w.nextNode())){var p=n.parentNode;if(p&&p.nodeName!=='SCRIPT'&&p.nodeName!=='STYLE'&&p.nodeName!=='TITLE'&&re.test(n.nodeValue))list.push(n);re.lastIndex=0}
+    list.forEach(function(t){
+      var f=document.createDocumentFragment(),txt=t.nodeValue,last=0,m;re.lastIndex=0;
+      while((m=re.exec(txt))){
+        if(m.index>last)f.appendChild(document.createTextNode(txt.slice(last,m.index)));
+        var k=m[1].replace(/\uFE0F/g,''),im=document.createElement('img');
+        im.src=EMO[k];im.alt=k;im.className='emo';im.draggable=false;f.appendChild(im);last=m.index+m[0].length;
+      }
+      if(last<txt.length)f.appendChild(document.createTextNode(txt.slice(last)));
+      t.parentNode.replaceChild(f,t);
+    });
+  }
+  var busy=false;
+  function run(){if(busy)return;busy=true;try{conv(document.body)}catch(e){}busy=false}
+  new MutationObserver(run).observe(document.body,{childList:true,subtree:true,characterData:true});
+  run();
+})();
+</script>
+
+<script>/* recorded voice: zh-CN-XiaoxiaoNeural */window.__AUD={"面对紧急状况，不要慌。遇到紧急状况，可以大声向路人求助，拨打九九九，或者向成人求助。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "房子着火了！浓烟冒出来。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "有人在水里喊“救命”。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "同学跌倒了，流很多血。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "在商场里和妈妈走散了。我迷路了。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "今天有雾霾。我在学校，一直咳嗽，喘不过气。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "我想吃糖果，也想要新玩具。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "玩具车的电池没电了。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "公路上发生车祸，有人受伤。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "我迷路了。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "我很怕，膝盖流血了。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "弟弟跌倒了，大哭“妈妈！”": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "吹风筒坏了，冒出烟来。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "陌生人说：“我有糖果和玩具，跟我来拿！”": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "雾霾天，下课了。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "做得好": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "太棒了！遇到紧急状况，不要慌，大声求助，拨打九九九，或者向成人求助。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "小朋友，你怎么了？": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "别怕。我会用广播帮你找妈妈。你知道妈妈的电话号码吗？": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "小华！妈妈在这里！": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "你做得很好！迷路了要冷静，向保安或职员求助。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "小朋友，我有糖果和新玩具，跟我到车上拿吧！": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "来嘛，很近而已，我拉你过去！": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "怎么了？": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "你别怕，老师会请保安和你的爸爸妈妈来。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "你做得很对！不可以接受陌生人的糖果和玩具，要大声求助。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "你怎么了？": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "别怕，老师带你去医务室，也会通知你的爸爸妈妈。如果很严重，大人会拨打 九九九。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "你做得很好！雾霾天少出去，不舒服要马上告诉大人。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "我在这里！别怕。你站着别动，妈妈拿手电筒来。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "妈妈在这里。我们用手电筒，等电来。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "你做得很好！停电时不要慌，留在原地，找大人帮忙，不要自己玩火。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "我是送快递的，请开门！": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "小朋友，我有糖果和玩具，快开门！": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "爸爸马上回来。你不要开门。如果有人撞门，请叫邻居，大人会拨 九九九。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "你做得很对！爸爸妈妈不在时，不开门给陌生人，要告诉大人。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "您好，这里是 九九九。请问发生什么事？": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "请问你在哪里？": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "好的，我们马上来。你叫什么名字？": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "知道了。请站在安全的地方，等大人来。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>", "你做得很好！打 九九九 要说清楚：发生什么事、在哪里、你的名字。": "data:audio/mpeg;base64,<EMBEDDED-DATA-OMITTED>"};</script>
+</body>
+</html>
