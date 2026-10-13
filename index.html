@@ -260,7 +260,17 @@ button.m:active{transform:scale(.97)}
   function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 
   /* ---------- speech ---------- */
+  var curAudio=null;
   function say(t){
+    t=String(t).replace(/999/g,'九九九');
+    try{
+      if(curAudio){curAudio.pause();curAudio=null}
+      var src=(window.__AUD||{})[t];
+      if(src){var a=new Audio(src);curAudio=a;a.play().catch(function(){speak(t)});return}
+    }catch(e){}
+    speak(t);
+  }
+  function speak(t){
     try{
       if(!('speechSynthesis' in window))return;
       speechSynthesis.cancel();
@@ -298,7 +308,7 @@ button.m:active{transform:scale(.97)}
   function buildQuiz(host,items,key){
     items.forEach(function(it){
       var q=document.createElement('div');q.className='q';
-      var html='<div class="q-top"><div class="q-pic" aria-hidden="true">'+it.pic+'</div><div class="q-text"><b>'+it.title+'</b>'+(it.sub?'<span>'+it.sub+'</span>':'')+'</div><button class="say" aria-label="听一听" data-say="'+it.title+(it.sub?'。'+it.sub:'')+'">🔊</button></div><div class="opts">';
+      var html='<div class="q-top"><div class="q-pic" aria-hidden="true">'+it.pic+'</div><div class="q-text"><b>'+it.title+'</b>'+(it.sub?'<span>'+it.sub+'</span>':'')+'</div><button class="say" aria-label="听一听" data-say="'+it.title+(it.sub?(/[。！？]$/.test(it.title)?'':'。')+it.sub:'')+'">🔊</button></div><div class="opts">';
       it.opts.forEach(function(o,i){html+='<button class="opt" data-i="'+i+'">'+(o.e?'<span class="e">'+o.e+'</span>':'')+'<span>'+o.t+'</span></button>'});
       html+='</div><div class="fb" hidden></div>';
       q.innerHTML=html;
