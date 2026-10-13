@@ -264,22 +264,38 @@ button.m:active{transform:scale(.97)}
   function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 
   /* ---------- speech ---------- */
-  var curAudio=null;
+  var curAudio=null,sayToken=0;
+  function stopSay(){
+    sayToken++;
+    if(curAudio){try{curAudio.pause()}catch(e){}curAudio=null}
+    try{if('speechSynthesis' in window)speechSynthesis.cancel()}catch(e){}
+  }
+  /* plays one line; returns a promise that resolves when it has finished (or was interrupted) */
   function say(t){
     t=String(t).replace(/999/g,'九九九');
-    try{
-      if(curAudio){curAudio.pause();curAudio=null}
+    stopSay();
+    var my=sayToken;
+    return new Promise(function(resolve){
       var src=(window.__AUD||{})[t];
-      if(src){var a=new Audio(src);curAudio=a;a.play().catch(function(){speak(t)});return}
-    }catch(e){}
-    speak(t);
+      if(src){
+        try{
+          var a=new Audio(src);curAudio=a;
+          a.onended=function(){resolve()};
+          var p=a.play();
+          if(p&&p.catch)p.catch(function(){if(sayToken===my)speak(t,resolve);else resolve()});
+          return;
+        }catch(e){}
+      }
+      speak(t,resolve);
+    });
   }
-  function speak(t){
+  function speak(t,done){
     try{
-      if(!('speechSynthesis' in window))return;
-      speechSynthesis.cancel();
-      var u=new SpeechSynthesisUtterance(t);u.lang='zh-CN';u.rate=.85;speechSynthesis.speak(u);
-    }catch(e){}
+      if(!('speechSynthesis' in window)){done&&done();return}
+      var u=new SpeechSynthesisUtterance(t);u.lang='zh-CN';u.rate=.85;
+      if(done){u.onend=done;u.onerror=done}
+      speechSynthesis.speak(u);
+    }catch(e){done&&done()}
   }
 
   /* ---------- progress ---------- */
@@ -297,7 +313,7 @@ button.m:active{transform:scale(.97)}
     $('#starCount').textContent=totalStars();
   }
   function go(i){
-    now=i;maxSeen=Math.max(maxSeen,i);
+    stopSay();now=i;maxSeen=Math.max(maxSeen,i);
     steps.forEach(function(s,k){s.classList.toggle('on',k===i)});
     if(i===5)finish();
     drawDots();
@@ -471,24 +487,30 @@ button.m:active{transform:scale(.97)}
   }
   var cur=null,idx=0,slip=false;
   function start(id){
-    cur=SC.filter(function(c){return c.id===id})[0];idx=0;slip=false;
+    cur=SC.filter(function(c){return c.id===id})[0];idx=0;slip=false;run++;stopSay();
     msgs.innerHTML='';choices.innerHTML='';cFb.hidden=true;cEnd.hidden=true;
     $('#chatTitle').textContent=cur.title;var ci=$('#chatImg'),cs=(window.__SCENE||{})[cur.img];if(cs){ci.src=cs;ci.hidden=false}else{ci.hidden=true}
     $('#scList').hidden=true;chat.hidden=false;
     advance();
   }
+  var run=0,lastLine=null;
   function advance(){
-    cFb.hidden=true;
+    cFb.hidden=true;lastLine=null;
+    var myRun=run;
     while(idx<cur.steps.length){
       var st=cur.steps[idx];
       if(st.q){showChoices(st);return}
       bubble(st);
-      if(st.who)say(st.t);
+      if(st.who)lastLine=say(st.t);
       idx++;
     }
     cEnd.textContent='🎉 '+cur.end;cEnd.hidden=false;
     if(!doneSc[cur.id]){doneSc[cur.id]=1;score.roles=Object.keys(doneSc).length;drawDots()}
-    say(cur.end);
+    var endText=cur.end;
+    (lastLine||Promise.resolve()).then(function(){
+      if(myRun!==run)return;
+      setTimeout(function(){if(myRun===run)say(endText)},350);
+    });
   }
   function showChoices(st){
     choices.innerHTML='';
@@ -509,7 +531,7 @@ button.m:active{transform:scale(.97)}
     });
   }
   $('#scList').addEventListener('click',function(e){var b=e.target.closest('[data-sc]');if(b)start(b.dataset.sc)});
-  $('#chatBack').onclick=function(){chat.hidden=true;$('#scList').hidden=false;drawList();window.scrollTo({top:0,behavior:'auto'})};
+  $('#chatBack').onclick=function(){run++;stopSay();chat.hidden=true;$('#scList').hidden=false;drawList();window.scrollTo({top:0,behavior:'auto'})};
   drawList();
 
   /* ---------- finish ---------- */
