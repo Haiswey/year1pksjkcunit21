@@ -94,32 +94,31 @@ button{font:inherit;color:inherit;cursor:pointer}
 .m.pair2{border-color:#3b82c4;background:color-mix(in srgb,#3b82c4 22%,var(--surface))}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
-.card-form{display:grid;gap:12px}
-.field{display:flex;flex-direction:column;gap:4px;font-weight:700}
-.field input{font:inherit;font-size:1.1rem;padding:12px 14px;border-radius:14px;border:3px solid var(--line);background:var(--bg);color:var(--ink);width:100%;min-width:0}
-.idcard{background:var(--surface);border:3px solid var(--ink);border-radius:20px;padding:16px;display:grid;gap:6px}
-.idcard .h{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.idcard dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
-.idcard dt{color:var(--muted)} .idcard dd{margin:0;font-weight:700;overflow-wrap:anywhere}
-
-.phone{max-width:300px;margin-inline:auto;background:var(--ink);color:var(--bg);border-radius:28px;padding:18px;display:flex;flex-direction:column;gap:12px}
-.screen{background:var(--bg);color:var(--ink);border-radius:14px;min-height:64px;padding:8px 12px;font-size:2rem;font-weight:900;letter-spacing:.2em;text-align:center;font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:center;text-wrap:balance}
-.screen.msg{font-size:1rem;letter-spacing:0;font-weight:700;line-height:1.4}
-.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.key{height:56px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);font-size:1.5rem;font-weight:900}
-.key:active{transform:scale(.94)}
-.key.call{background:var(--ok);color:#fff} .key.clr{background:var(--alarm);color:var(--alarm-ink);font-size:1.1rem}
-
-.script{background:var(--ok-bg);border-radius:16px;padding:12px 16px;font-weight:700}
-.roles{display:grid;gap:12px}
-.role{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:14px 16px;display:grid;gap:8px}
-.role .row{display:flex;gap:12px;align-items:center}
-.role .e{font-size:2.6rem}
-.say-line{background:var(--sun);color:var(--sun-ink);border-radius:14px;padding:6px 12px;font-weight:900;align-self:flex-start}
-.check{display:flex;align-items:center;gap:10px;font-weight:700;min-height:44px}
-.check input{width:26px;height:26px;accent-color:var(--ok)}
-.parent{border-left:6px solid var(--sun);padding:6px 14px;color:var(--muted);font-size:.95rem}
-
+.sclist{display:grid;gap:12px}
+.sc{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:14px 16px;width:100%}
+.sc .ico{font-size:2.4rem;width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:var(--bg)}
+.sc b{display:block;font-family:var(--font-display);font-weight:400;font-size:1.25rem}
+.sc span.d{color:var(--muted);font-size:.95rem}
+.sc .st{font-size:1.6rem}
+.sc.done{border-color:var(--ok)}
+.chat{display:flex;flex-direction:column;gap:12px}
+.chat-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.chat-bar .btn{padding:8px 16px;min-height:44px;font-size:1rem}
+.msgs{display:flex;flex-direction:column;gap:10px;background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:14px;min-height:140px}
+.msg{display:flex;gap:10px;align-items:flex-end;max-width:92%}
+.msg .av{font-size:1.8rem;width:44px;height:44px;flex:none;border-radius:50%;background:var(--bg);display:grid;place-items:center}
+.msg .bub{background:var(--bg);border-radius:18px 18px 18px 4px;padding:10px 14px;font-weight:700;min-width:0;overflow-wrap:anywhere}
+.msg .who{display:block;font-size:.8rem;color:var(--muted);font-weight:400}
+.msg.me{align-self:flex-end;flex-direction:row-reverse}
+.msg.me .bub{background:var(--sun);color:var(--sun-ink);border-radius:18px 18px 4px 18px}
+.msg.note{align-self:stretch;max-width:100%}
+.msg.note .bub{background:transparent;border:2px dashed var(--line);border-radius:14px;color:var(--muted);text-align:center;width:100%}
+.msg{animation:pop .25s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}}
+.choices{display:grid;gap:10px}
+.choices .opt{justify-content:flex-start;text-align:left}
+.choices .opt .e{flex:none}
+.big999{font-weight:900}
 .nav{display:flex;gap:12px;justify-content:space-between;margin-top:6px}
 .btn{border:0;border-radius:999px;padding:14px 26px;font-weight:900;font-size:1.1rem;min-height:52px}
 .btn.next{background:var(--alarm);color:var(--alarm-ink);margin-left:auto}
@@ -129,7 +128,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .finale .trophy{font-size:4.5rem;line-height:1}
 .starrow{font-size:2.4rem;letter-spacing:.1em}
 .small{font-size:.9rem;color:var(--muted)}
-@media (prefers-reduced-motion:reduce){.m.shake{animation:none}}
+@media (prefers-reduced-motion:reduce){.m.shake,.msg{animation:none}}
 </style>
 </head>
 <body>
@@ -148,7 +147,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <div class="step-head">
       <span class="tag">单元十一 · 糖果玩具不可要</span>
       <h1>面对紧急状况，<br>不要慌！</h1>
-      <p class="lead">今天我们要学：认识紧急状况，知道怎么做，还要练习说“救命”和打 999。</p>
+      <p class="lead">今天我们要学：认识紧急状况，知道怎么做，还要在聊天故事里练习求助。</p>
       <button class="say" data-say="面对紧急状况，不要慌。遇到紧急状况，可以大声向路人求助，拨打九九九，或者向成人求助。">🔊 听一听</button>
     </div>
     <div class="calm"><span class="big">🧘</span><div><b>先深呼吸，保持冷静</b>想一想，找谁来帮忙？</div></div>
@@ -158,6 +157,7 @@ button{font:inherit;color:inherit;cursor:pointer}
       <div class="way w3"><div class="ico">🧑‍🏫</div><div><h3>向成人求助</h3><p>爸爸妈妈、老师、警察、邻居，都是可以帮忙的人。</p></div></div>
     </div>
     <div class="rule"><span class="ico">⚠️</span><p><b>记住：</b>只有真的发生紧急状况，才可以拨 999。平时不可以乱打，也不可以拿来玩。</p></div>
+    <div class="rule"><span class="ico">🍬</span><p><b>糖果玩具不可要！</b>陌生人给的糖果和玩具，不可以接受，也不可以跟陌生人走。</p></div>
     <div class="nav"><button class="btn next" data-go="1">开始学习 ➜</button></div>
   </section>
 
@@ -204,40 +204,15 @@ button{font:inherit;color:inherit;cursor:pointer}
     <div class="step-head">
       <span class="tag">10.1.3 实践求助</span>
       <h2>我会求助</h2>
-      <p class="lead">请爸爸妈妈陪你完成这一步。</p>
+      <p class="lead">像聊天一样，选一选你会怎么说、怎么做。选对了，故事才会继续。</p>
     </div>
-
-    <div class="panel card-form">
-      <h3>① 我的求助卡</h3>
-      <p class="lead">迷路了，可以给警察或大人看。请大人帮你填写。</p>
-      <label class="field">我的名字<input id="fName" autocomplete="off"></label>
-      <label class="field">我家的地址<input id="fAddr" autocomplete="off"></label>
-      <label class="field">爸爸或妈妈的电话<input id="fTel" inputmode="tel" autocomplete="off"></label>
-      <div class="idcard" aria-live="polite">
-        <div class="h"><h3>我的求助卡</h3><span class="badge999">999</span></div>
-        <dl><dt>名字</dt><dd id="cName">—</dd><dt>地址</dt><dd id="cAddr">—</dd><dt>电话</dt><dd id="cTel">—</dd></dl>
-      </div>
-    </div>
-
-    <div class="panel" style="display:grid;gap:12px">
-      <h3>② 练习拨打 999</h3>
-      <p class="lead">这是练习用的假电话，不会真的打出去。紧急求助电话是哪三个号码？按一按，再按绿色键。</p>
-      <div class="phone">
-        <div class="screen" id="screen" aria-live="polite">&nbsp;</div>
-        <div class="pad" id="pad"></div>
-      </div>
-      <div class="script" id="script" hidden>
-        <p>接通后要这样说：</p>
-        <p>“我是 <span id="sName">＿＿</span>。我在 <span id="sAddr">＿＿</span>。发生了紧急状况，请快来帮忙！”</p>
-        <button class="say" style="margin-top:8px" id="sayScript">🔊 听一听</button>
-      </div>
-    </div>
-
-    <div class="panel" style="display:grid;gap:12px">
-      <h3>③ 演一演</h3>
-      <p class="lead">和家人一起表演，说出求助的话。演好了就打勾。</p>
-      <div class="roles" id="roles"></div>
-      <p class="parent"><b>给家长：</b>请孩子大声说出求助的话，并表演正确的做法。演完后，请孩子自己勾选。可以拍一张照片或短片发给老师。</p>
+    <div id="scList" class="sclist"></div>
+    <div id="chat" class="chat" hidden>
+      <div class="chat-bar"><button class="btn back" id="chatBack">⬅ 选别的故事</button><b id="chatTitle"></b></div>
+      <div class="msgs" id="msgs" aria-live="polite"></div>
+      <div class="choices" id="choices"></div>
+      <div class="fb" id="chatFb" hidden></div>
+      <div class="fb good" id="chatEnd" hidden></div>
     </div>
     <div class="nav"><button class="btn back" data-go="3">⬅ 返回</button><button class="btn next" data-go="5">完成 ➜</button></div>
   </section>
@@ -254,7 +229,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <div class="panel">
       <h3>今天记住了吗？</h3>
       <p>① 不要慌　② 大声向路人求助　③ 拨打 999　④ 向成人求助</p>
-      <p class="small" style="margin-top:8px">别忘了请爸爸妈妈把演一演的照片或短片发给老师。</p>
+      <p class="small" style="margin-top:8px">想再练习，可以回到“我会求助”，换一个故事玩。</p>
     </div>
     <div class="nav"><button class="btn back" data-go="4">⬅ 返回</button><button class="btn next" id="again">再玩一次 ↺</button></div>
   </section>
@@ -266,7 +241,7 @@ button{font:inherit;color:inherit;cursor:pointer}
   var steps=[].slice.call(document.querySelectorAll('.step'));
   var now=0, maxSeen=0;
   var score={q1:0,q2:0,match:0,roles:0};
-  var TOTAL={q1:6,q2:5,match:3,roles:3};
+  var TOTAL={q1:7,q2:7,match:3,roles:4};
 
   function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
 
@@ -338,6 +313,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     {pic:'🏊🆘',title:'有人在水里喊“救命”。',opts:yn(true),why:'有人溺水，要大声找大人帮忙，不要自己跳下水。'},
     {pic:'🤕🩸',title:'同学跌倒了，流很多血。',opts:yn(true),why:'受伤流血要马上告诉大人。'},
     {pic:'😢🧭',title:'在商场里和妈妈走散了。',sub:'我迷路了。',opts:yn(true),why:'迷路了要找可以信任的人帮忙，例如警察或商场职员。'},
+    {pic:'😷🌫️',title:'今天有雾霾。我在学校，一直咳嗽，喘不过气。',opts:yn(true),why:'呼吸不顺是紧急状况，要马上告诉老师。'},
     {pic:'🍬🧸',title:'我想吃糖果，也想要新玩具。',opts:yn(false),why:'想要东西不是紧急状况，不可以拨 999。'},
     {pic:'🚗💤',title:'玩具车的电池没电了。',opts:yn(false),why:'玩具没电不是紧急状况，换电池就可以了。'}
   ],'q1');
@@ -352,7 +328,11 @@ button{font:inherit;color:inherit;cursor:pointer}
     {pic:'👦🧸',title:'弟弟跌倒了，大哭“妈妈！”',opts:[
       {t:'去找大人来帮忙',e:'🏃',ok:true},{t:'继续玩玩具',e:'🧸',ok:false,hint:'要帮助弟弟。'}],why:'马上找大人来帮忙。'},
     {pic:'💨⚡',title:'吹风筒坏了，冒出烟来。',opts:[
-      {t:'大声叫大人来',e:'📢',ok:true},{t:'自己用手去修',e:'🔧',ok:false,hint:'电器很危险，不可以自己修。'}],why:'电器出问题很危险，要请大人处理。'}
+      {t:'大声叫大人来',e:'📢',ok:true},{t:'自己用手去修',e:'🔧',ok:false,hint:'电器很危险，不可以自己修。'}],why:'电器出问题很危险，要请大人处理。'},
+    {pic:'🕶️🍬',title:'陌生人说：“我有糖果和玩具，跟我来拿！”',opts:[
+      {t:'说“不要！”，走去找大人',e:'✋',ok:true},{t:'高兴地跟他去',e:'😋',ok:false,hint:'糖果玩具不可要！'}],why:'不接受陌生人的糖果和玩具，要马上告诉大人。'},
+    {pic:'😷🏫',title:'雾霾天，下课了。',opts:[
+      {t:'留在教室里玩',e:'🏫',ok:true},{t:'去操场跑步',e:'🏃',ok:false,hint:'雾霾天空气不好。'}],why:'雾霾天尽量留在室内。'}
   ],'q2');
 
   /* ---------- match ---------- */
@@ -388,55 +368,107 @@ button{font:inherit;color:inherit;cursor:pointer}
     }
   });
 
-  /* ---------- identity card ---------- */
-  ['Name','Addr','Tel'].forEach(function(n){
-    var inp=$('#f'+n),out=$('#c'+n);
-    var v=store('pdpr999'+n);if(v)inp.value=v;
-    function up(){out.textContent=inp.value.trim()||'—';store('pdpr999'+n,inp.value);syncScript()}
-    inp.addEventListener('input',up);out.textContent=inp.value.trim()||'—';
-  });
-  function syncScript(){
-    $('#sName').textContent=$('#fName').value.trim()||'＿＿';
-    $('#sAddr').textContent=$('#fAddr').value.trim()||'＿＿';
-  }
-  syncScript();
-  $('#sayScript').onclick=function(){say($('#script p:nth-of-type(2)').textContent)};
-
-  /* ---------- keypad ---------- */
-  var num='';var scr=$('#screen');
-  var keys=['1','2','3','4','5','6','7','8','9','清除','0','拨打'];
-  keys.forEach(function(k){
-    var b=document.createElement('button');b.className='key'+(k==='拨打'?' call':k==='清除'?' clr':'');
-    b.textContent=k==='拨打'?'📞':k;b.setAttribute('aria-label',k);
-    b.onclick=function(){press(k)};$('#pad').appendChild(b);
-  });
-  function show(t,msg){scr.textContent=t;scr.classList.toggle('msg',!!msg)}
-  function press(k){
-    if(k==='清除'){num='';show(' ');return}
-    if(k==='拨打'){
-      if(num==='999'){show('📞 接通了！警察和救护人员在听。',true);$('#script').hidden=false;syncScript()}
-      else if(!num){show('请先按号码。',true)}
-      else{show('这个号码不对。紧急求助电话是 999。',true);num=''}
-      return;
-    }
-    if(num.length>=6)return;
-    num+=k;show(num);
-  }
-
-  /* ---------- role play ---------- */
-  var roles=[
-    {e:'🧑‍🦱❓',t:'他是谁？有陌生人在门外。',line:'“你是谁？我不认识你！”',how:'不开门，马上告诉在家的大人。',say:'你是谁？我不认识你！'},
-    {e:'🦹🏠',t:'有小偷进来了！',line:'“小偷！救命啊！”',how:'大声叫，躲到安全的地方，请大人拨 999。',say:'小偷！救命啊！'},
-    {e:'🤒🧑‍🤝‍🧑',t:'同学晕倒了。',line:'“老师，他晕倒了！”',how:'马上跑去找老师或大人帮忙。',say:'老师，他晕倒了，请快来帮忙！'}
+  /* ---------- chat scenarios ---------- */
+  var N=function(t){return {n:t}};
+  var T=function(av,who,t){return {av:av,who:who,t:t}};
+  var C=function(q,opts){return {q:q,opts:opts}};
+  var O=function(e,t,ok,hint){return {e:e,t:t,ok:ok,hint:hint||''}};
+  var SC=[
+    {id:'lost',ico:'🛍️',title:'在商场迷路了',d:'找不到妈妈，怎么办？',end:'你做得很好！迷路了要冷静，向保安或职员求助。',steps:[
+      N('你在商场里和妈妈走散了。你看不到妈妈。'),
+      C('你会怎么做？',[O('🧍','站在原地，不要慌，找保安或职员帮忙',1),O('🏃','到处乱跑去找妈妈',0,'乱跑会让妈妈更难找到你。'),O('🚶','跟着一个陌生人走',0,'不可以跟陌生人走。')]),
+      T('👮','保安叔叔','小朋友，你怎么了？'),
+      C('你要怎么说？',[O('🗣️','我和妈妈走散了。我叫小华。',1),O('😭','（一直哭，什么也不说）',0,'要把话说出来，叔叔才知道怎么帮你。'),O('🙅','我不要跟你说话！',0,'保安叔叔是可以帮你的人。')]),
+      T('👮','保安叔叔','别怕。我会用广播帮你找妈妈。你知道妈妈的电话号码吗？'),
+      C('你怎么回答？',[O('📱','我知道，我告诉你。',1),O('🙋','我不知道，但我记得妈妈穿红色的衣服。',1)]),
+      T('👩','妈妈','小华！妈妈在这里！')]},
+    {id:'candy',ico:'🍬',title:'陌生人给糖果和玩具',d:'放学后在校门口等妈妈',end:'你做得很对！不可以接受陌生人的糖果和玩具，要大声求助。',steps:[
+      N('放学了，你在校门口等妈妈。'),
+      T('🕶️','陌生人','小朋友，我有糖果和新玩具，跟我到车上拿吧！'),
+      C('你会怎么做？',[O('😋','好啊，我要糖果和玩具！',0,'糖果玩具不可要！陌生人可能是坏人。'),O('✋','不要！我不认识你！',1)]),
+      T('🕶️','陌生人','来嘛，很近而已，我拉你过去！'),
+      C('他想拉你的手，你要怎么办？',[O('📢','大声叫“救命啊！”，跑去找老师或保安',1),O('🤫','不出声，跟着他走',0,'要大声求救，让大家听见。'),O('🙈','躲起来，不告诉任何人',0,'要马上告诉大人。')]),
+      T('🧑‍🏫','老师','怎么了？'),
+      C('你要怎么说？',[O('🗣️','老师，有陌生人要给我糖果，还想拉我走！',1),O('🤐','没事。（什么也不说）',0,'要告诉老师，老师才能保护你。')]),
+      T('🧑‍🏫','老师','你别怕，老师会请保安和你的爸爸妈妈来。')]},
+    {id:'haze',ico:'😷',title:'雾霾天，我不舒服',d:'在学校里遇到雾霾',end:'你做得很好！雾霾天少出去，不舒服要马上告诉大人。',steps:[
+      N('今天有雾霾，空气不好。下课了，同学们想去操场玩。'),
+      C('你会怎么做？',[O('🏫','留在教室里，不去操场',1),O('🏃','去操场跑步',0,'雾霾天空气不好，在外面跑步对身体不好。')]),
+      N('过了一会儿，你觉得胸口很闷，一直咳嗽，喘不过气。'),
+      C('你会怎么做？',[O('🙋','马上举手，告诉老师',1),O('😶','忍着，不说',0,'不舒服要马上告诉大人。')]),
+      T('🧑‍🏫','老师','你怎么了？'),
+      C('你要怎么说？',[O('🗣️','老师，我喘不过气，一直咳嗽！',1),O('😶','没什么。',0,'要把不舒服说出来。')]),
+      T('🧑‍🏫','老师','别怕，老师带你去医务室，也会通知你的爸爸妈妈。如果很严重，大人会拨打 999。')]},
+    {id:'call',ico:'📞',title:'拨打 999',d:'邻居家着火了！',end:'你做得很好！打 999 要说清楚：发生什么事、在哪里、你的名字。',steps:[
+      N('你在家，看到邻居家冒出浓烟，着火了！大人在旁边，请你一起打电话。'),
+      C('紧急求助电话是哪一个？',[O('📞','999',1),O('📞','123',0,'不对。紧急求助电话是 999。'),O('📞','000',0,'不对。紧急求助电话是 999。')]),
+      T('🎧','接线员','您好，这里是 999。请问发生什么事？'),
+      C('你要怎么说？',[O('🔥','邻居家着火了！',1),O('🍬','我想吃糖果。',0,'999 只能在紧急状况才可以打。'),O('📵','（不说话，把电话挂掉）',0,'要把事情说清楚，才会有人来帮忙。')]),
+      T('🎧','接线员','请问你在哪里？'),
+      C('你要怎么回答？',[O('🏠','我在花园路 12 号，就在邻居家隔壁。',1),O('🤷','我不知道。',0,'要说出地址。平时要记住自己家的地址。'),O('🌳','在外面。',0,'要说清楚地方，消防员才找得到。')]),
+      T('🎧','接线员','好的，我们马上来。你叫什么名字？'),
+      C('你要怎么说？',[O('🗣️','我叫小明。请快一点！',1),O('🙅','我不告诉你。',0,'接线员要知道你的名字，才能联络你。')]),
+      T('🎧','接线员','知道了。请站在安全的地方，等大人来。')]}
   ];
-  var rh='';
-  roles.forEach(function(r,i){
-    rh+='<div class="role"><div class="row"><span class="e">'+r.e+'</span><div style="min-width:0"><b>'+r.t+'</b><div class="small">'+r.how+'</div></div></div><div class="say-line">我要说：'+r.line+'</div><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="say" data-say="'+r.say+'">🔊 听一听</button><label class="check"><input type="checkbox" data-r="'+i+'"> 我演好了</label></div></div>';
-  });
-  $('#roles').innerHTML=rh;
-  $('#roles').addEventListener('change',function(e){
-    score.roles=[].slice.call(document.querySelectorAll('[data-r]')).filter(function(c){return c.checked}).length;drawDots();
-  });
+  var doneSc={};
+  var chat=$('#chat'),msgs=$('#msgs'),choices=$('#choices'),cFb=$('#chatFb'),cEnd=$('#chatEnd');
+  function drawList(){
+    var h='';
+    SC.forEach(function(c){
+      h+='<button class="sc'+(doneSc[c.id]?' done':'')+'" data-sc="'+c.id+'"><span class="ico">'+c.ico+'</span><span style="min-width:0"><b>'+c.title+'</b><span class="d">'+c.d+'</span></span><span class="st">'+(doneSc[c.id]?'✅':'▶️')+'</span></button>';
+    });
+    $('#scList').innerHTML=h;
+  }
+  function bubble(o){
+    var d=document.createElement('div');
+    if(o.me){d.className='msg me';d.innerHTML='<div class="av">🧒</div><div class="bub"></div>';d.lastChild.textContent=o.t}
+    else if(o.n){d.className='msg note';d.innerHTML='<div class="bub"></div>';d.lastChild.textContent=o.n}
+    else{d.className='msg';d.innerHTML='<div class="av">'+o.av+'</div><div class="bub"><span class="who"></span><span class="tx"></span></div>';d.querySelector('.who').textContent=o.who;d.querySelector('.tx').textContent=o.t}
+    msgs.appendChild(d);
+    d.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
+  var cur=null,idx=0,slip=false;
+  function start(id){
+    cur=SC.filter(function(c){return c.id===id})[0];idx=0;slip=false;
+    msgs.innerHTML='';choices.innerHTML='';cFb.hidden=true;cEnd.hidden=true;
+    $('#chatTitle').textContent=cur.title;
+    $('#scList').hidden=true;chat.hidden=false;
+    advance();
+  }
+  function advance(){
+    cFb.hidden=true;
+    while(idx<cur.steps.length){
+      var st=cur.steps[idx];
+      if(st.q){showChoices(st);return}
+      bubble(st);
+      if(st.who)say(st.t);
+      idx++;
+    }
+    cEnd.textContent='🎉 '+cur.end;cEnd.hidden=false;
+    if(!doneSc[cur.id]){doneSc[cur.id]=1;score.roles=Object.keys(doneSc).length;drawDots()}
+    say(cur.end);
+  }
+  function showChoices(st){
+    choices.innerHTML='';
+    var p=document.createElement('p');p.style.fontWeight='700';p.textContent='👉 '+st.q;choices.appendChild(p);
+    st.opts.forEach(function(o){
+      var b=document.createElement('button');b.className='opt';
+      b.innerHTML='<span class="e">'+o.e+'</span><span></span>';b.lastChild.textContent=o.t;
+      b.onclick=function(){
+        if(o.ok){
+          choices.innerHTML='';bubble({me:1,t:o.t});idx++;
+          setTimeout(advance,450);
+        }else{
+          b.classList.add('wrong');b.disabled=true;
+          cFb.className='fb try';cFb.hidden=false;cFb.textContent='再想一想。'+o.hint;
+        }
+      };
+      choices.appendChild(b);
+    });
+  }
+  $('#scList').addEventListener('click',function(e){var b=e.target.closest('[data-sc]');if(b)start(b.dataset.sc)});
+  $('#chatBack').onclick=function(){chat.hidden=true;$('#scList').hidden=false;drawList();window.scrollTo({top:0,behavior:'auto'})};
+  drawList();
 
   /* ---------- finish ---------- */
   function finish(){
