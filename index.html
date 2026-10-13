@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>找谁来帮忙</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&family=ZCOOL+KuaiLe&display=swap">
+<style>
+/* Layout: one phone-first column, six steps behind a sticky progress bar; big tap targets for Year 1 */
+:root{
+  --bg:#eef6fb; --surface:#ffffff; --ink:#1b2a41; --muted:#4f6279; --line:#cfe0ee;
+  --alarm:#e63946; --alarm-ink:#ffffff; --sun:#ffc93c; --sun-ink:#3d2e00;
+  --ok:#1f8a70; --ok-bg:#dcf4ec; --bad:#c0392b; --bad-bg:#fde4e1;
+  --font-display:"ZCOOL KuaiLe","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --font-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1b2b; --surface:#192a40; --ink:#eef4fa; --muted:#a9bbcf; --line:#2c425d;
+  --alarm:#ff5a67; --alarm-ink:#1b0709; --sun:#ffd25a; --sun-ink:#3d2e00;
+  --ok:#5fd3b3; --ok-bg:#12372f; --bad:#ff8c80; --bad-bg:#40201d; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1b2b; --surface:#192a40; --ink:#eef4fa; --muted:#a9bbcf; --line:#2c425d;
+  --alarm:#ff5a67; --alarm-ink:#1b0709; --sun:#ffd25a; --sun-ink:#3d2e00;
+  --ok:#5fd3b3; --ok-bg:#12372f; --bad:#ff8c80; --bad-bg:#40201d; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:18px;line-height:1.6;padding-inline:16px;padding-block:0 40px}
+.wrap{max-width:720px;margin-inline:auto}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;line-height:1.25;text-wrap:balance;margin:0}
+h1{font-size:2.2rem} h2{font-size:1.7rem} h3{font-size:1.3rem}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--alarm);outline-offset:2px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 8px}
+.top-row{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.brand{font-family:var(--font-display);font-size:1.15rem;display:flex;align-items:center;gap:8px}
+.badge999{background:var(--alarm);color:var(--alarm-ink);border-radius:8px;padding:0 8px;font-weight:900;letter-spacing:.06em;font-size:1rem}
+.stars{font-weight:700;font-variant-numeric:tabular-nums}
+.dots{display:flex;gap:6px;margin-top:8px}
+.dot{flex:1;height:10px;border-radius:5px;background:var(--line);border:0;padding:0}
+.dot.done{background:var(--ok)} .dot.now{background:var(--sun);outline:2px solid var(--ink);outline-offset:1px}
+
+.step{display:none;flex-direction:column;gap:18px;padding-top:14px}
+.step.on{display:flex}
+.step-head{display:flex;flex-direction:column;gap:6px}
+.tag{align-self:flex-start;background:var(--sun);color:var(--sun-ink);font-weight:900;font-size:.85rem;border-radius:999px;padding:2px 12px;letter-spacing:.04em}
+.lead{color:var(--muted)}
+.say{background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:700;display:inline-flex;gap:6px;align-items:center;min-height:44px}
+.say:active{transform:scale(.97)}
+
+.panel{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:18px}
+.calm{display:flex;gap:14px;align-items:center;background:var(--sun);color:var(--sun-ink);border-radius:20px;padding:16px 18px}
+.calm .big{font-size:2.6rem;line-height:1}
+.calm b{font-family:var(--font-display);font-weight:400;font-size:1.5rem;display:block}
+
+.ways{display:grid;gap:12px}
+.way{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:14px 16px}
+.way .ico{font-size:2.4rem;width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:var(--bg)}
+.way h3{margin-bottom:2px}
+.way p{color:var(--muted);font-size:1rem}
+.way.w1 .ico{background:var(--sun)} .way.w2 .ico{background:var(--alarm)} .way.w3 .ico{background:var(--ok-bg)}
+.rule{border:3px dashed var(--alarm);border-radius:20px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.rule .ico{font-size:2rem}
+
+.q{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.q.solved{border-color:var(--ok)}
+.q-top{display:flex;gap:14px;align-items:center}
+.q-pic{font-size:3.2rem;line-height:1;width:84px;height:84px;flex:none;border-radius:18px;background:var(--bg);display:grid;place-items:center}
+.q-text{min-width:0}
+.q-text b{font-size:1.15rem;display:block}
+.q-text span{color:var(--muted);font-size:.95rem}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.opt{border:3px solid var(--line);background:var(--bg);border-radius:16px;padding:12px;min-height:64px;font-weight:700;display:flex;gap:8px;align-items:center;justify-content:center;text-align:center;line-height:1.35}
+.opt .e{font-size:1.7rem}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt:disabled{cursor:default}
+.fb{border-radius:14px;padding:10px 14px;font-size:1rem;font-weight:700}
+.fb.good{background:var(--ok-bg);color:var(--ok)}
+.fb.try{background:var(--bad-bg);color:var(--bad)}
+.fb[hidden]{display:none}
+
+.match{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.m{border:3px solid var(--line);background:var(--surface);border-radius:18px;padding:12px 8px;min-height:120px;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center;text-align:center;font-weight:700;font-size:1rem;line-height:1.35}
+.m .e{font-size:2.6rem;line-height:1}
+.m.sel{border-color:var(--sun);background:var(--sun);color:var(--sun-ink)}
+.m.shake{animation:shake .35s}
+.m.pair0{border-color:var(--alarm);background:var(--bad-bg)}
+.m.pair1{border-color:var(--ok);background:var(--ok-bg)}
+.m.pair2{border-color:#3b82c4;background:color-mix(in srgb,#3b82c4 22%,var(--surface))}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+.card-form{display:grid;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px;font-weight:700}
+.field input{font:inherit;font-size:1.1rem;padding:12px 14px;border-radius:14px;border:3px solid var(--line);background:var(--bg);color:var(--ink);width:100%;min-width:0}
+.idcard{background:var(--surface);border:3px solid var(--ink);border-radius:20px;padding:16px;display:grid;gap:6px}
+.idcard .h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.idcard dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.idcard dt{color:var(--muted)} .idcard dd{margin:0;font-weight:700;overflow-wrap:anywhere}
+
+.phone{max-width:300px;margin-inline:auto;background:var(--ink);color:var(--bg);border-radius:28px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.screen{background:var(--bg);color:var(--ink);border-radius:14px;min-height:64px;padding:8px 12px;font-size:2rem;font-weight:900;letter-spacing:.2em;text-align:center;font-variant-numeric:tabular-nums;display:flex;align-items:center;justify-content:center;text-wrap:balance}
+.screen.msg{font-size:1rem;letter-spacing:0;font-weight:700;line-height:1.4}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.key{height:56px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);font-size:1.5rem;font-weight:900}
+.key:active{transform:scale(.94)}
+.key.call{background:var(--ok);color:#fff} .key.clr{background:var(--alarm);color:var(--alarm-ink);font-size:1.1rem}
+
+.script{background:var(--ok-bg);border-radius:16px;padding:12px 16px;font-weight:700}
+.roles{display:grid;gap:12px}
+.role{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:14px 16px;display:grid;gap:8px}
+.role .row{display:flex;gap:12px;align-items:center}
+.role .e{font-size:2.6rem}
+.say-line{background:var(--sun);color:var(--sun-ink);border-radius:14px;padding:6px 12px;font-weight:900;align-self:flex-start}
+.check{display:flex;align-items:center;gap:10px;font-weight:700;min-height:44px}
+.check input{width:26px;height:26px;accent-color:var(--ok)}
+.parent{border-left:6px solid var(--sun);padding:6px 14px;color:var(--muted);font-size:.95rem}
+
+.nav{display:flex;gap:12px;justify-content:space-between;margin-top:6px}
+.btn{border:0;border-radius:999px;padding:14px 26px;font-weight:900;font-size:1.1rem;min-height:52px}
+.btn.next{background:var(--alarm);color:var(--alarm-ink);margin-left:auto}
+.btn.back{background:var(--surface);border:2px solid var(--line)}
+.btn[disabled]{opacity:.45;cursor:default}
+.finale{text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.finale .trophy{font-size:4.5rem;line-height:1}
+.starrow{font-size:2.4rem;letter-spacing:.1em}
+.small{font-size:.9rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.m.shake{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="top-row">
+      <div class="brand"><span class="badge999">999</span><span>找谁来帮忙？</span></div>
+      <div class="stars" aria-live="polite">⭐ <span id="starCount">0</span></div>
+    </div>
+    <nav class="dots" id="dots" aria-label="学习进度"></nav>
+  </header>
+
+  <!-- 0 -->
+  <section class="step on" data-title="开始">
+    <div class="step-head">
+      <span class="tag">单元十一 · 糖果玩具不可要</span>
+      <h1>面对紧急状况，<br>不要慌！</h1>
+      <p class="lead">今天我们要学：认识紧急状况，知道怎么做，还要练习说“救命”和打 999。</p>
+      <button class="say" data-say="面对紧急状况，不要慌。遇到紧急状况，可以大声向路人求助，拨打九九九，或者向成人求助。">🔊 听一听</button>
+    </div>
+    <div class="calm"><span class="big">🧘</span><div><b>先深呼吸，保持冷静</b>想一想，找谁来帮忙？</div></div>
+    <div class="ways">
+      <div class="way w1"><div class="ico">📢</div><div><h3>大声向路人求助</h3><p>大喊“救命啊！”，请附近的叔叔阿姨帮忙。</p></div></div>
+      <div class="way w2"><div class="ico">📞</div><div><h3>拨打紧急求助电话 999</h3><p>火灾、有人受重伤、遇到坏人时，请大人拨打。</p></div></div>
+      <div class="way w3"><div class="ico">🧑‍🏫</div><div><h3>向成人求助</h3><p>爸爸妈妈、老师、警察、邻居，都是可以帮忙的人。</p></div></div>
+    </div>
+    <div class="rule"><span class="ico">⚠️</span><p><b>记住：</b>只有真的发生紧急状况，才可以拨 999。平时不可以乱打，也不可以拿来玩。</p></div>
+    <div class="nav"><button class="btn next" data-go="1">开始学习 ➜</button></div>
+  </section>
+
+  <!-- 1 -->
+  <section class="step" data-title="紧急状况" id="s1">
+    <div class="step-head">
+      <span class="tag">10.1.1 明白紧急事件</span>
+      <h2>这是紧急状况吗？</h2>
+      <p class="lead">看图，点一点“是”或“不是”。</p>
+    </div>
+    <div id="quiz1" class="qlist" style="display:grid;gap:14px"></div>
+    <div class="panel">
+      <h3>还有哪些紧急状况？</h3>
+      <p class="lead">和爸爸妈妈说一说，你还想到哪些紧急状况？例如：停电、地震、有陌生人敲门……</p>
+    </div>
+    <div class="nav"><button class="btn back" data-go="0">⬅ 返回</button><button class="btn next" data-go="2">下一步 ➜</button></div>
+  </section>
+
+  <!-- 2 -->
+  <section class="step" data-title="谁做得对" id="s2">
+    <div class="step-head">
+      <span class="tag">10.1.2 适当的方法</span>
+      <h2>谁做得对？</h2>
+      <p class="lead">点一点你觉得对的做法。选错了可以再选一次。</p>
+    </div>
+    <div id="quiz2" style="display:grid;gap:14px"></div>
+    <div class="nav"><button class="btn back" data-go="1">⬅ 返回</button><button class="btn next" data-go="3">下一步 ➜</button></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="step" data-title="连一连" id="s3">
+    <div class="step-head">
+      <span class="tag">10.1.2 适当的方法</span>
+      <h2>连一连</h2>
+      <p class="lead">先点左边的图，再点右边正确的求助方法。配对成功会变色。</p>
+    </div>
+    <div class="match" id="match"></div>
+    <div class="fb good" id="matchDone" hidden>全部连对了，真棒！ 🎉</div>
+    <div class="nav"><button class="btn back" data-go="2">⬅ 返回</button><button class="btn next" data-go="4">下一步 ➜</button></div>
+  </section>
+
+  <!-- 4 -->
+  <section class="step" data-title="我会求助" id="s4">
+    <div class="step-head">
+      <span class="tag">10.1.3 实践求助</span>
+      <h2>我会求助</h2>
+      <p class="lead">请爸爸妈妈陪你完成这一步。</p>
+    </div>
+
+    <div class="panel card-form">
+      <h3>① 我的求助卡</h3>
+      <p class="lead">迷路了，可以给警察或大人看。请大人帮你填写。</p>
+      <label class="field">我的名字<input id="fName" autocomplete="off"></label>
+      <label class="field">我家的地址<input id="fAddr" autocomplete="off"></label>
+      <label class="field">爸爸或妈妈的电话<input id="fTel" inputmode="tel" autocomplete="off"></label>
+      <div class="idcard" aria-live="polite">
+        <div class="h"><h3>我的求助卡</h3><span class="badge999">999</span></div>
+        <dl><dt>名字</dt><dd id="cName">—</dd><dt>地址</dt><dd id="cAddr">—</dd><dt>电话</dt><dd id="cTel">—</dd></dl>
+      </div>
+    </div>
+
+    <div class="panel" style="display:grid;gap:12px">
+      <h3>② 练习拨打 999</h3>
+      <p class="lead">这是练习用的假电话，不会真的打出去。紧急求助电话是哪三个号码？按一按，再按绿色键。</p>
+      <div class="phone">
+        <div class="screen" id="screen" aria-live="polite">&nbsp;</div>
+        <div class="pad" id="pad"></div>
+      </div>
+      <div class="script" id="script" hidden>
+        <p>接通后要这样说：</p>
+        <p>“我是 <span id="sName">＿＿</span>。我在 <span id="sAddr">＿＿</span>。发生了紧急状况，请快来帮忙！”</p>
+        <button class="say" style="margin-top:8px" id="sayScript">🔊 听一听</button>
+      </div>
+    </div>
+
+    <div class="panel" style="display:grid;gap:12px">
+      <h3>③ 演一演</h3>
+      <p class="lead">和家人一起表演，说出求助的话。演好了就打勾。</p>
+      <div class="roles" id="roles"></div>
+      <p class="parent"><b>给家长：</b>请孩子大声说出求助的话，并表演正确的做法。演完后，请孩子自己勾选。可以拍一张照片或短片发给老师。</p>
+    </div>
+    <div class="nav"><button class="btn back" data-go="3">⬅ 返回</button><button class="btn next" data-go="5">完成 ➜</button></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="step" data-title="完成" id="s5">
+    <div class="finale panel">
+      <div class="trophy">🏆</div>
+      <h2>你学会了！</h2>
+      <div class="starrow" id="finalStars" aria-live="polite"></div>
+      <p id="finalMsg"></p>
+      <button class="say" data-say="太棒了！遇到紧急状况，不要慌，大声求助，拨打九九九，或者向成人求助。">🔊 听一听</button>
+    </div>
+    <div class="panel">
+      <h3>今天记住了吗？</h3>
+      <p>① 不要慌　② 大声向路人求助　③ 拨打 999　④ 向成人求助</p>
+      <p class="small" style="margin-top:8px">别忘了请爸爸妈妈把演一演的照片或短片发给老师。</p>
+    </div>
+    <div class="nav"><button class="btn back" data-go="4">⬅ 返回</button><button class="btn next" id="again">再玩一次 ↺</button></div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var $=function(s,r){return (r||document).querySelector(s)};
+  var steps=[].slice.call(document.querySelectorAll('.step'));
+  var now=0, maxSeen=0;
+  var score={q1:0,q2:0,match:0,roles:0};
+  var TOTAL={q1:6,q2:5,match:3,roles:3};
+
+  function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+
+  /* ---------- speech ---------- */
+  function say(t){
+    try{
+      if(!('speechSynthesis' in window))return;
+      speechSynthesis.cancel();
+      var u=new SpeechSynthesisUtterance(t);u.lang='zh-CN';u.rate=.85;speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  /* ---------- progress ---------- */
+  function totalStars(){return score.q1+score.q2+score.match+score.roles}
+  function maxStars(){return TOTAL.q1+TOTAL.q2+TOTAL.match+TOTAL.roles}
+  function drawDots(){
+    var d=$('#dots');d.innerHTML='';
+    steps.forEach(function(s,i){
+      var b=document.createElement('button');
+      b.className='dot'+(i===now?' now':'')+(i<now?' done':'');
+      b.setAttribute('aria-label','第'+(i+1)+'步：'+s.dataset.title);
+      b.onclick=function(){if(i<=maxSeen)go(i)};
+      d.appendChild(b);
+    });
+    $('#starCount').textContent=totalStars();
+  }
+  function go(i){
+    now=i;maxSeen=Math.max(maxSeen,i);
+    steps.forEach(function(s,k){s.classList.toggle('on',k===i)});
+    if(i===5)finish();
+    drawDots();
+    window.scrollTo({top:0,behavior:'auto'});
+  }
+  document.addEventListener('click',function(e){
+    var g=e.target.closest('[data-go]');if(g){go(+g.dataset.go);return}
+    var s=e.target.closest('[data-say]');if(s){say(s.dataset.say)}
+  });
+
+  /* ---------- choice quizzes ---------- */
+  function buildQuiz(host,items,key){
+    items.forEach(function(it){
+      var q=document.createElement('div');q.className='q';
+      var html='<div class="q-top"><div class="q-pic" aria-hidden="true">'+it.pic+'</div><div class="q-text"><b>'+it.title+'</b>'+(it.sub?'<span>'+it.sub+'</span>':'')+'</div><button class="say" aria-label="听一听" data-say="'+it.title+(it.sub?'。'+it.sub:'')+'">🔊</button></div><div class="opts">';
+      it.opts.forEach(function(o,i){html+='<button class="opt" data-i="'+i+'">'+(o.e?'<span class="e">'+o.e+'</span>':'')+'<span>'+o.t+'</span></button>'});
+      html+='</div><div class="fb" hidden></div>';
+      q.innerHTML=html;
+      var tried=false,done=false,fb=q.querySelector('.fb');
+      q.querySelectorAll('.opt').forEach(function(b){
+        b.onclick=function(){
+          if(done)return;
+          var o=it.opts[+b.dataset.i];
+          if(o.ok){
+            done=true;b.classList.add('right');q.classList.add('solved');
+            q.querySelectorAll('.opt').forEach(function(x){x.disabled=true});
+            fb.className='fb good';fb.hidden=false;fb.textContent='✔ 答对了！'+it.why;
+            if(!tried){score[key]++;drawDots()}
+          }else{
+            tried=true;b.classList.add('wrong');b.disabled=true;
+            fb.className='fb try';fb.hidden=false;fb.textContent='再想一想，再选一次。'+(o.hint||'');
+          }
+        };
+      });
+      host.appendChild(q);
+    });
+  }
+  var yn=function(yes){return [{t:'是',e:'🚨',ok:yes},{t:'不是',e:'🙂',ok:!yes}]};
+  buildQuiz($('#quiz1'),[
+    {pic:'🔥🏠',title:'房子着火了！',sub:'浓烟冒出来。',opts:yn(true),why:'着火很危险，要马上找大人，拨打 999。'},
+    {pic:'🏊🆘',title:'有人在水里喊“救命”。',opts:yn(true),why:'有人溺水，要大声找大人帮忙，不要自己跳下水。'},
+    {pic:'🤕🩸',title:'同学跌倒了，流很多血。',opts:yn(true),why:'受伤流血要马上告诉大人。'},
+    {pic:'😢🧭',title:'在商场里和妈妈走散了。',sub:'我迷路了。',opts:yn(true),why:'迷路了要找可以信任的人帮忙，例如警察或商场职员。'},
+    {pic:'🍬🧸',title:'我想吃糖果，也想要新玩具。',opts:yn(false),why:'想要东西不是紧急状况，不可以拨 999。'},
+    {pic:'🚗💤',title:'玩具车的电池没电了。',opts:yn(false),why:'玩具没电不是紧急状况，换电池就可以了。'}
+  ],'q1');
+
+  buildQuiz($('#quiz2'),[
+    {pic:'🚗💥',title:'公路上发生车祸，有人受伤。',opts:[
+      {t:'拨打 999，请救护车来',e:'📞',ok:true},{t:'拍照放到网上',e:'📱',ok:false,hint:'受伤的人需要马上帮忙。'}],why:'要拨 999，请救护车和警察来。'},
+    {pic:'😟🗺️',title:'我迷路了。',opts:[
+      {t:'向警察叔叔求助',e:'👮',ok:true},{t:'跟着陌生人走',e:'🚶',ok:false,hint:'不可以跟陌生人走。'}],why:'警察可以帮我们找到家人。'},
+    {pic:'😨🤕',title:'我很怕，膝盖流血了。',opts:[
+      {t:'告诉大人，请他帮忙',e:'🧑‍🍼',ok:true},{t:'躲起来，不告诉别人',e:'🙈',ok:false,hint:'受伤要告诉大人。'}],why:'告诉大人，才能得到帮助。'},
+    {pic:'👦🧸',title:'弟弟跌倒了，大哭“妈妈！”',opts:[
+      {t:'去找大人来帮忙',e:'🏃',ok:true},{t:'继续玩玩具',e:'🧸',ok:false,hint:'要帮助弟弟。'}],why:'马上找大人来帮忙。'},
+    {pic:'💨⚡',title:'吹风筒坏了，冒出烟来。',opts:[
+      {t:'大声叫大人来',e:'📢',ok:true},{t:'自己用手去修',e:'🔧',ok:false,hint:'电器很危险，不可以自己修。'}],why:'电器出问题很危险，要请大人处理。'}
+  ],'q2');
+
+  /* ---------- match ---------- */
+  var L=[{e:'🤕',t:'有人晕倒了',k:0},{e:'😢',t:'我迷路了',k:1},{e:'🕶️',t:'陌生人一直跟着我',k:2}];
+  var R=[{e:'📢',t:'大声求救，向路人求助',k:2},{e:'📞🚑',t:'拨打 999，请救护车',k:0},{e:'👮',t:'向警察求助',k:1}];
+  var selL=null,matched=0;
+  function drawMatch(){
+    var h='<div class="col" id="cl"></div><div class="col" id="cr"></div>';
+    $('#match').innerHTML=h;
+    L.forEach(function(it,i){
+      var b=document.createElement('button');b.className='m';b.dataset.k=it.k;b.dataset.side='l';
+      b.innerHTML='<span class="e">'+it.e+'</span><span>'+it.t+'</span>';$('#cl').appendChild(b)});
+    R.forEach(function(it,i){
+      var b=document.createElement('button');b.className='m';b.dataset.k=it.k;b.dataset.side='r';
+      b.innerHTML='<span class="e">'+it.e+'</span><span>'+it.t+'</span>';$('#cr').appendChild(b)});
+  }
+  $('#match').addEventListener('click',function(e){
+    var b=e.target.closest('.m');if(!b||b.dataset.done)return;
+    if(b.dataset.side==='l'){
+      if(selL)selL.classList.remove('sel');
+      selL=b;b.classList.add('sel');say(b.textContent);return;
+    }
+    if(!selL)return;
+    if(selL.dataset.k===b.dataset.k){
+      var c='pair'+(matched%3);
+      [selL,b].forEach(function(x){x.classList.remove('sel');x.classList.add(c);x.dataset.done=1});
+      matched++;score.match=matched;
+      selL=null;
+      if(matched===3){$('#matchDone').hidden=false}
+      drawDots();
+    }else{
+      b.classList.add('shake');setTimeout(function(){b.classList.remove('shake')},400);
+    }
+  });
+
+  /* ---------- identity card ---------- */
+  ['Name','Addr','Tel'].forEach(function(n){
+    var inp=$('#f'+n),out=$('#c'+n);
+    var v=store('pdpr999'+n);if(v)inp.value=v;
+    function up(){out.textContent=inp.value.trim()||'—';store('pdpr999'+n,inp.value);syncScript()}
+    inp.addEventListener('input',up);out.textContent=inp.value.trim()||'—';
+  });
+  function syncScript(){
+    $('#sName').textContent=$('#fName').value.trim()||'＿＿';
+    $('#sAddr').textContent=$('#fAddr').value.trim()||'＿＿';
+  }
+  syncScript();
+  $('#sayScript').onclick=function(){say($('#script p:nth-of-type(2)').textContent)};
+
+  /* ---------- keypad ---------- */
+  var num='';var scr=$('#screen');
+  var keys=['1','2','3','4','5','6','7','8','9','清除','0','拨打'];
+  keys.forEach(function(k){
+    var b=document.createElement('button');b.className='key'+(k==='拨打'?' call':k==='清除'?' clr':'');
+    b.textContent=k==='拨打'?'📞':k;b.setAttribute('aria-label',k);
+    b.onclick=function(){press(k)};$('#pad').appendChild(b);
+  });
+  function show(t,msg){scr.textContent=t;scr.classList.toggle('msg',!!msg)}
+  function press(k){
+    if(k==='清除'){num='';show(' ');return}
+    if(k==='拨打'){
+      if(num==='999'){show('📞 接通了！警察和救护人员在听。',true);$('#script').hidden=false;syncScript()}
+      else if(!num){show('请先按号码。',true)}
+      else{show('这个号码不对。紧急求助电话是 999。',true);num=''}
+      return;
+    }
+    if(num.length>=6)return;
+    num+=k;show(num);
+  }
+
+  /* ---------- role play ---------- */
+  var roles=[
+    {e:'🧑‍🦱❓',t:'他是谁？有陌生人在门外。',line:'“你是谁？我不认识你！”',how:'不开门，马上告诉在家的大人。',say:'你是谁？我不认识你！'},
+    {e:'🦹🏠',t:'有小偷进来了！',line:'“小偷！救命啊！”',how:'大声叫，躲到安全的地方，请大人拨 999。',say:'小偷！救命啊！'},
+    {e:'🤒🧑‍🤝‍🧑',t:'同学晕倒了。',line:'“老师，他晕倒了！”',how:'马上跑去找老师或大人帮忙。',say:'老师，他晕倒了，请快来帮忙！'}
+  ];
+  var rh='';
+  roles.forEach(function(r,i){
+    rh+='<div class="role"><div class="row"><span class="e">'+r.e+'</span><div style="min-width:0"><b>'+r.t+'</b><div class="small">'+r.how+'</div></div></div><div class="say-line">我要说：'+r.line+'</div><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="say" data-say="'+r.say+'">🔊 听一听</button><label class="check"><input type="checkbox" data-r="'+i+'"> 我演好了</label></div></div>';
+  });
+  $('#roles').innerHTML=rh;
+  $('#roles').addEventListener('change',function(e){
+    score.roles=[].slice.call(document.querySelectorAll('[data-r]')).filter(function(c){return c.checked}).length;drawDots();
+  });
+
+  /* ---------- finish ---------- */
+  function finish(){
+    var t=totalStars(),m=maxStars(),n=Math.round(t/m*5);
+    $('#finalStars').textContent=new Array(n+1).join('⭐')+new Array(5-n+1).join('☆');
+    $('#finalMsg').textContent='你得了 '+t+' 颗星，共 '+m+' 颗。'+(t===m?'全部答对，太棒了！':'没拿到的星星，可以返回再试一次。');
+    say('做得好');
+  }
+  $('#again').onclick=function(){location.reload()};
+
+  drawMatch();drawDots();
+})();
+</script>
+</body>
+</html>
